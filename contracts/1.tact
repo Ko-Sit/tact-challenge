@@ -35,7 +35,7 @@ contract Task1 with Deployable {
     
     receive(msg: Subtract) {
        if (self.subtractRequestMap.get(msg.queryId) == null) {
-            self.addRequestMap.set(msg.queryId, msg.number);
+            self.subtractRequestMap.set(msg.queryId, msg.number);
             self.counter = self.counter - msg.number;
         }
     }
