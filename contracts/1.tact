@@ -49,14 +49,14 @@ contract Task1 with Deployable {
     get fun counter(): Int {
         let sum: Int = 0;
         let i: Int = 0;
-        while (i < self.addIndex) {           
-            i = i + 1;
+        while (i < self.addIndex) {
             sum = sum + self.addKeys.get(i)!!;
+            i = i + 1;
         }
         i = 0;
-        while (i < self.subtractIndex) {           
-            i = i + 1;
+        while (i < self.subtractIndex) {
             sum = sum + self.subtractKeys.get(i)!!;
+            i = i + 1;
         }
         return sum;
     }
