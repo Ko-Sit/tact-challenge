@@ -28,14 +28,14 @@ contract Task1 with Deployable {
 
     receive(msg: Add) {
         if (self.addRequestMap.get(msg.queryId) == null) {
-            self.addRequestMap.set(msg.queryId, 0);
+            self.addRequestMap.set(msg.queryId, msg.number);
             self.counter = self.counter + msg.number;
         }
     }
     
     receive(msg: Subtract) {
        if (self.subtractRequestMap.get(msg.queryId) == null) {
-            self.addRequestMap.set(msg.queryId, 0);
+            self.addRequestMap.set(msg.queryId, msg.number);
             self.counter = self.counter - msg.number;
         }
     }
