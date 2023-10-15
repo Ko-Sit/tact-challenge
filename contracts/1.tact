@@ -19,17 +19,25 @@ message Subtract {
 
 contract Task1 with Deployable {
     counter: Int as int32;
+    addRequestMap: map<Int, Int>;
+    subtractRequestMap: map<Int, Int>;
 
     init() {
       self.counter = 0;
     }
 
     receive(msg: Add) {
-        self.counter = self.counter + msg.number;
+        if (self.addRequestMap.get(msg.queryId) == null) {
+            self.addRequestMap.set(msg.queryId, 0);
+            self.counter = self.counter + msg.number;
+        }
     }
     
     receive(msg: Subtract) {
-        self.counter = self.counter - msg.number;
+       if (self.subtractRequestMap.get(msg.queryId) == null) {
+            self.addRequestMap.set(msg.queryId, 0);
+            self.counter = self.counter - msg.number;
+        }
     }
 
     get fun counter(): Int {
