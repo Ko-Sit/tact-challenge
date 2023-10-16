@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 /*
   TASK 3 - DEX
   Create a simple jetton dex contract that trades one pair of jettons: A and B.
@@ -38,7 +37,6 @@ message(0x7362d09c) TokenNotification {
     from: Address;
     forwardPayload: Slice as remaining;
 }
-
 message(0xf8a7ea5) TokenTransfer {
     queryId: Int as uint64;
     amount: Int as coins;
@@ -49,29 +47,61 @@ message(0xf8a7ea5) TokenTransfer {
     forwardPayload: Slice as remaining;
 }
 
+message Pair {
+    left: Pool;
+    right: Pool;
+}
+
+message Pool {
+    amt: Int;
+    addr: Address;
+}
+
 contract Task3 with Deployable {
-  owner: Address;
-  aAmount: Int;
-  bAmount: Int;
-  jettonAddressA: Address;
-  jettonAddressB: Address;
-  decimal: Int;
+    owner: Address;
+    aAmount: Int;
+    bAmount: Int;
+    jettonAddressA: Address;
+    jettonAddressB: Address;
+    decimal: Int;
+    init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address){
+        self.owner = admin;
+        self.jettonAddressA = newJettonAddressA;
+        self.jettonAddressB = newJettonAddressB;
+        self.aAmount = 0;
+        self.bAmount = 0;
+        self.decimal = 1000000000;
+    }
 
-  init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address) {
-    self.owner = admin;
-    self.jettonAddressA = newJettonAddressA;
-    self.jettonAddressB = newJettonAddressB;
-    self.aAmount = 0;
-    self.bAmount = 0;
-    self.decimal = 1000000000;
-  }
+    receive(msg: TokenNotification){
+        // check if jetton a or b
+        // top up for admins
+        // check if incoming < jetton available
+        // return swapped
+    }
 
-  receive(msg: TokenNotification) {
-  } 
-  
-  get fun price(jetton: Address): Int { 
-  }
-  
-  get fun balance(jetton: Address): Int { 
-  }
+    get fun price(jetton: Address): Int {
+        let pr: Pair = self.getPair(jetton);
+        return pr.left.amt * self.decimal / pr.right.amt;
+    }
+
+    fun getPair(from: Address): Pair {
+        let left: Pool = self.getPool(from);
+        let right: Pool = self.getPool(self.jettonAddressB);
+        if (left.addr == self.jettonAddressB) {
+            right = self.getPool(self.jettonAddressA);
+        } 
+        return Pair{left: left, right: right};
+    }
+
+    fun getPool(jetton: Address): Pool {
+        if (jetton == self.jettonAddressA) {
+            return Pool{amt: self.aAmount, addr: jetton};
+        }
+        return Pool{amt: self.bAmount, addr: jetton};
+    }
+
+    get fun balance(jetton: Address): Int {
+        return self.getPool(jetton).amt;
+    }
 }
