@@ -34,7 +34,7 @@ contract Task2 with Deployable {
                 value: 0,
                 mode: SendRemainingBalance,
                 bounce: true,
-                body: body
+                body: "mo".asComment()
             }
         );
     }
