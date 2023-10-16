@@ -18,7 +18,7 @@ message Subtract {
 }
 
 contract Task1 with Deployable {
-    counter: Int as int32;
+    counter: Int as int64;
 
     init() {
       self.counter = 0;
@@ -26,12 +26,22 @@ contract Task1 with Deployable {
 
     receive(msg: Add) {
         self.counter = self.counter + msg.number;
-        self.reply("".asComment());
+        send(SendParameters{
+            to: sender(),
+            value: 0, 
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: "add".asComment()
+        });
     }
     
     receive(msg: Subtract) {
         self.counter = self.counter - msg.number;
-        self.reply("".asComment());
+    send(SendParameters{
+            to: sender(),
+            value: 0, 
+            mode: SendRemainingValue + SendIgnoreErrors,
+            body: "subtract".asComment()
+        });
     }
 
     get fun counter(): Int {
