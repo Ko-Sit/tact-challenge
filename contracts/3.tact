@@ -1,4 +1,5 @@
 import "@stdlib/deploy";
+
 /*
   TASK 3 - DEX
   Create a simple jetton dex contract that trades one pair of jettons: A and B.
@@ -74,7 +75,7 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        let tokenAddr : Address = msg.from;
+        let tokenAddr: Address = msg.from;
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
@@ -88,8 +89,13 @@ contract Task3 with Deployable {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
                 send(SendParameters{to: sender(), value: 0, mode: SendRemainingValue});
+            } else {
+                // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
+                // A-B (amtB * decimal / amtA) * tokenA / decimal
+                let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
+                self.addBalance(pr.left.addr, msg.amount);
+                self.subtractBalance(pr.right.addr, swapped);
             }
-            // return swapped
         }
     }
 
@@ -112,7 +118,7 @@ contract Task3 with Deployable {
     }
 
      fun getPool(jetton: Address): Pool {
-        let pl : Pool = Pool{amt: self.aAmount, addr: jetton};
+        let pl: Pool = Pool{amt: self.aAmount, addr: jetton};
         if (jetton == self.jettonAddressA) {
             return pl;
         } else if (jetton == self.jettonAddressB) {
@@ -121,6 +127,22 @@ contract Task3 with Deployable {
             throw(0x100);
         }
         return pl;
+    }
+
+    fun addBalance(jetton: Address, amt: Int) {
+        if (jetton == self.jettonAddressA) {
+            self.aAmount = self.aAmount + amt;
+        } else {
+            self.bAmount = self.bAmount + amt;
+        }
+    }
+
+    fun subtractBalance(jetton: Address, amt: Int) {
+        if (jetton == self.jettonAddressA) {
+            self.aAmount = self.aAmount - amt;
+        } else {
+            self.bAmount = self.bAmount - amt;
+        }
     }
 
     get fun balance(jetton: Address): Int {
