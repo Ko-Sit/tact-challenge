@@ -18,11 +18,6 @@ message(0x44) Refund {
   sender: Address;
 }
 
-message ForwardToAdmin {
-    from: Address;
-    forward_payload: Slice as remaining;
-}
-
 contract Task2 with Deployable {
   admin: Address;
 
@@ -41,15 +36,16 @@ contract Task2 with Deployable {
   }
 
   receive(msg: Slice) {
+    let body: Cell = beginCell()
+        .storeSlice(msg)
+        .storeAddress(context().sender)
+        .endCell(); 
     send(SendParameters{
         to: self.admin,
         value: context().value, 
         bounce: true,
         mode: SendRemainingValue + SendIgnoreErrors,
-        body: ForwardToAdmin {
-            from: context().sender,
-            forward_payload: msg
-        }
+        body: body
     });
   }
 }
