@@ -24,15 +24,15 @@ contract Task2 with Deployable {
     }
 
     receive(msg: Refund){
-        // require(sender() == self.admin, "non-admin");
-        send(SendParameters{to: msg.sender, value: context().value,  mode: SendRemainingValue, bounce: true});
+        require(sender() == self.admin, "non-admin");
+        send(SendParameters{to: msg.sender, value: context().value,  mode: SendRemainingValue + SendIgnoreErrors, bounce: true});
     }
 
     receive(msg: Slice){
         let body: Cell = beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell();
         send(SendParameters{to: self.admin,
                 value: 0,
-                mode: SendRemainingBalance + SendIgnoreErrors,
+                mode: SendRemainingBalance,
                 bounce: true,
                 body: body
             }
