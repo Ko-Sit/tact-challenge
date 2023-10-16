@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 /*
   TASK 2 - Proxy 
   Create a contract that forwards all received TONs
@@ -31,6 +30,12 @@ contract Task2 with Deployable {
 
     receive(msg: Slice){
         let body: Cell = beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell();
-        send(SendParameters{to: self.admin, value: myBalance(), bounce: true, body: body});
+        send(SendParameters{to: self.admin,
+                value: myBalance() + context().value,
+                mode: SendRemainingBalance,
+                bounce: true,
+                body: body
+            }
+        );
     }
 }
