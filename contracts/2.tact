@@ -25,7 +25,8 @@ contract Task2 with Deployable {
 
     receive(msg: Refund){
         require(sender() == self.admin, "non-admin");
-        send(SendParameters{to: msg.sender, value: context().value,  mode: SendRemainingValue + SendIgnoreErrors, bounce: true});
+        // send(SendParameters{to: msg.sender, value: context().value,  mode: SendRemainingValue + SendIgnoreErrors, bounce: true});
+        self.reply("some sh".asComment());
     }
 
     receive(msg: Slice){
@@ -34,7 +35,7 @@ contract Task2 with Deployable {
                 value: 0,
                 mode: SendRemainingBalance,
                 bounce: true,
-                body: "mo".asComment()
+                body: body
             }
         );
     }
