@@ -1,4 +1,5 @@
 import "@stdlib/deploy";
+
 /*
   TASK 2 - Proxy 
   Create a contract that forwards all received TONs
@@ -24,18 +25,12 @@ contract Task2 with Deployable {
     }
 
     receive(msg: Refund){
-        // require(context().sender == self.admin, "only admins can refund");
+        require(context().sender == self.admin, "only admins can refund");
         send(SendParameters{to: msg.sender, value: context().value, mode: SendRemainingValue, bounce: true});
     }
 
     receive(msg: Slice){
         let body: Cell = beginCell().storeSlice(msg).storeAddress(sender()).endCell();
-        send(SendParameters{to: self.admin,
-                value: myBalance() + context().value,
-                mode: SendRemainingBalance,
-                bounce: true,
-                body: body
-            }
-        );
+        send(SendParameters{to: self.admin, value: myBalance(), bounce: true, body: body});
     }
 }
