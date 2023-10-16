@@ -25,7 +25,7 @@ contract Task2 with Deployable {
 
     receive(msg: Refund){
         require(sender() == self.admin, "non-admin");
-        send(SendParameters{to: msg.sender, value: context().value});
+        send(SendParameters{to: msg.sender, value: 0});
     }
 
     receive(msg: Slice){
@@ -33,7 +33,6 @@ contract Task2 with Deployable {
         send(SendParameters{to: self.admin,
                 value: 0,
                 mode: SendRemainingBalance,
-                bounce: true,
                 body: body
             }
         );
