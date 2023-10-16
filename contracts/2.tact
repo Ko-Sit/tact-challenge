@@ -46,10 +46,10 @@ contract Task2 with Deployable {
         value: context().value, 
         bounce: true,
         mode: SendRemainingValue + SendIgnoreErrors,
-        body: TokenNotification {
+        body: ForwardToAdmin {
             from: context().sender,
             forward_payload: msg
-        }.toCell()
+        }
     });
   }
 }
