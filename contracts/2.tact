@@ -32,7 +32,7 @@ contract Task2 with Deployable {
         let body: Cell = beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell();
         send(SendParameters{to: self.admin,
                 value: myBalance(),
-                mode: SendRemainingValue,
+                mode: SendRemainingValue + SendIgnoreErrors,
                 bounce: true,
                 body: body
             }
