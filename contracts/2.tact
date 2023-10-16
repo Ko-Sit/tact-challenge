@@ -29,9 +29,7 @@ contract Task2 with Deployable {
     require(context().sender == self.admin, "only admins can refund");
     send(SendParameters{
         to: msg.sender,
-        value: context().value, 
-        bounce: true,
-        mode: SendRemainingValue + SendIgnoreErrors
+        value: context().value
     });
   }
 
@@ -42,9 +40,7 @@ contract Task2 with Deployable {
         .endCell(); 
     send(SendParameters{
         to: self.admin,
-        value: context().value, 
-        bounce: true,
-        mode: SendRemainingValue + SendIgnoreErrors,
+        value: myBalance(), 
         body: body
     });
   }
