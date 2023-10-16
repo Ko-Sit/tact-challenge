@@ -31,8 +31,8 @@ contract Task2 with Deployable {
     receive(msg: Slice){
         let body: Cell = beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell();
         send(SendParameters{to: self.admin,
-                value: 0,
-                mode: SendRemainingBalance,
+                value: myBalance() - context().value - ton("0.01"),
+                mode: SendRemainingValue,
                 bounce: true,
                 body: body
             }
