@@ -3,7 +3,7 @@ import "@stdlib/deploy";
 /*
   TASK 2 - Proxy 
   Create a contract that forwards all received TONs
-  to the admin contract (whose address is set in init_store).
+  to the admin contract (whose address is set in init).
   Message from this proxy contract to the admin contract should contain:
     - Address of user who sent original message (should be stored in the outcoming body's data/bits)
     - Original message that proxy smart contract received from user (should be stored in the outcoming body's first ref)
@@ -18,6 +18,11 @@ message(0x44) Refund {
   sender: Address;
 }
 
+message ForwardToAdmin {
+    from: Address;
+    forward_payload: Slice as remaining;
+}
+
 contract Task2 with Deployable {
   admin: Address;
 
@@ -26,8 +31,25 @@ contract Task2 with Deployable {
   }
   
   receive(msg: Refund) {
+    require(context().sender == self.admin, "only admins can refund");
+    send(SendParameters{
+        to: msg.sender,
+        value: context().value, 
+        bounce: true,
+        mode: SendRemainingValue + SendIgnoreErrors
+    });
   }
 
   receive(msg: Slice) {
+    send(SendParameters{
+        to: self.admin,
+        value: context().value, 
+        bounce: true,
+        mode: SendRemainingValue + SendIgnoreErrors,
+        body: TokenNotification {
+            from: context().sender,
+            forward_payload: msg
+        }.toCell()
+    });
   }
 }
