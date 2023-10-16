@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 /*
   TASK 2 - Proxy 
   Create a contract that forwards all received TONs
@@ -14,38 +13,29 @@ import "@stdlib/deploy";
 */
 
 message(0x44) Refund {
-  queryId: Int as uint64;
-  sender: Address;
+    queryId: Int as uint64;
+    sender: Address;
 }
 
 contract Task2 with Deployable {
-  admin: Address;
+    admin: Address;
+    init(admin: Address){
+        self.admin = admin;
+    }
 
-  init(admin: Address) {
-    self.admin = admin;
-  }
-  
-  receive(msg: Refund) {
-    // require(context().sender == self.admin, "only admins can refund");
-    send(SendParameters{
-        to: msg.sender,
-        value: context().value,
-        mode: SendRemainingValue,
-        bounce: true
-    });
-  }
+    receive(msg: Refund){
+        // require(context().sender == self.admin, "only admins can refund");
+        send(SendParameters{to: msg.sender, value: context().value, mode: SendRemainingValue, bounce: true});
+    }
 
-  receive(msg: Slice) {
-    let body: Cell = beginCell()
-        .storeSlice(msg)
-        .storeAddress(context().sender)
-        .endCell(); 
-    send(SendParameters{
-        to: self.admin,
-        value: myBalance() - context().value - ton("0.01"), 
-        mode: SendRemainingBalance,
-        bounce: true,
-        body: body
-    });
-  }
+    receive(msg: Slice){
+        let body: Cell = beginCell().storeSlice(msg).storeAddress(sender()).endCell();
+        send(SendParameters{to: self.admin,
+                value: myBalance() + context().value,
+                mode: SendRemainingBalance,
+                bounce: true,
+                body: body
+            }
+        );
+    }
 }
