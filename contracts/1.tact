@@ -19,45 +19,22 @@ message Subtract {
 
 contract Task1 with Deployable {
     counter: Int as int32;
-    addRequestMap: map<Int, Int>;
-    addKeys: map<Int, Int>;
-    addIndex: Int as uint8 = 0; 
-    subtractRequestMap: map<Int, Int>;
-    subtractKeys: map<Int, Int>;
-    subtractIndex: Int as uint8 = 0; 
 
     init() {
       self.counter = 0;
     }
 
     receive(msg: Add) {
-        if (self.addRequestMap.get(msg.queryId) == null) {
-            self.addRequestMap.set(msg.queryId, 0);
-            self.addKeys.set(self.addIndex, msg.number);
-            self.addIndex = self.addIndex + 1;
-        }
+        self.counter = self.counter + msg.number;
+        self.reply("add return".asComment());
     }
     
     receive(msg: Subtract) {
-       if (self.subtractRequestMap.get(msg.queryId) == null) {
-            self.subtractRequestMap.set(msg.queryId, 0);
-            self.subtractKeys.set(self.subtractIndex, msg.number);
-            self.subtractIndex = self.subtractIndex + 1;
-        }
+        self.counter = self.counter - msg.number;
+        self.reply("subtract return".asComment());
     }
 
     get fun counter(): Int {
-        let sum: Int = 0;
-        let i: Int = 0;
-        while (i < self.addIndex) {
-            sum = sum + self.addKeys.get(i)!!;
-            i = i + 1;
-        }
-        i = 0;
-        while (i < self.subtractIndex) {
-            sum = sum + self.subtractKeys.get(i)!!;
-            i = i + 1;
-        }
-        return sum;
+        return self.counter;
     }
 }
