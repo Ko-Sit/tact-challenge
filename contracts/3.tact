@@ -37,21 +37,21 @@ message(0x7362d09c) TokenNotification {
     from: Address;
     forwardPayload: Slice as remaining;
 }
+// To simplify the testing process and the specificity of the messages being sent, we decided to add clear default values in this transaction
 message(0xf8a7ea5) TokenTransfer {
-    queryId: Int as uint64;
-    amount: Int as coins;
-    destination: Address;
-    responseDestination: Address?;
-    customPayload: Cell?;
-    forwardTonAmount: Int as coins;
-    forwardPayload: Slice as remaining;
+    queryId: Int as uint64; // should be 0
+    amount: Int as coins; // should be amount of jettons to send
+    destination: Address; // should be user address / TokenNotification.from
+    responseDestination: Address?; // should be myAddress()
+    customPayload: Cell?; // should be null
+    forwardTonAmount: Int as coins; // should be ton("0.01")
+    forwardPayload: Slice as remaining; // should be emptySlice()
 }
-
 message Pair {
     left: Pool;
     right: Pool;
 }
-
+// todo move pool to contract
 message Pool {
     amt: Int;
     addr: Address;
@@ -74,10 +74,23 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
+        let tokenAddr : Address = msg.from;
         // check if jetton a or b
+        let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
-        // check if incoming < jetton available
-        // return swapped
+        if (sender() == self.owner) {
+            if (tokenAddr == self.jettonAddressA) {
+                self.aAmount = pr.left.amt + msg.amount;
+            } else {
+                self.bAmount = pr.left.amt + msg.amount;
+            }
+        } else {
+            // check if incoming < jetton available
+            if (pr.left.amt < msg.amount) {
+                send(SendParameters{to: sender(), value: 0, mode: SendRemainingValue});
+            }
+            // return swapped
+        }
     }
 
     get fun price(jetton: Address): Int {
@@ -85,20 +98,29 @@ contract Task3 with Deployable {
         return pr.left.amt * self.decimal / pr.right.amt;
     }
 
-    fun getPair(from: Address): Pair {
+     fun getPair(from: Address): Pair {
         let left: Pool = self.getPool(from);
         let right: Pool = self.getPool(self.jettonAddressB);
         if (left.addr == self.jettonAddressB) {
             right = self.getPool(self.jettonAddressA);
-        } 
+        } else if (left.addr == self.jettonAddressA) {
+            right = self.getPool(self.jettonAddressB);
+        } else {
+            throw(0x101);
+        }
         return Pair{left: left, right: right};
     }
 
-    fun getPool(jetton: Address): Pool {
+     fun getPool(jetton: Address): Pool {
+        let pl : Pool = Pool{amt: self.aAmount, addr: jetton};
         if (jetton == self.jettonAddressA) {
-            return Pool{amt: self.aAmount, addr: jetton};
+            return pl;
+        } else if (jetton == self.jettonAddressB) {
+            return Pool{amt: self.bAmount, addr: jetton};
+        } else {
+            throw(0x100);
         }
-        return Pool{amt: self.bAmount, addr: jetton};
+        return pl;
     }
 
     get fun balance(jetton: Address): Int {
