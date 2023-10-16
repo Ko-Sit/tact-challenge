@@ -17,8 +17,12 @@ message Subtract {
   number: Int as uint32;
 }
 
+message Res {
+    isTrue: Bool?;
+}
+
 contract Task1 with Deployable {
-    counter: Int as int64;
+    counter: Int as int32;
 
     init() {
       self.counter = 0;
@@ -26,22 +30,12 @@ contract Task1 with Deployable {
 
     receive(msg: Add) {
         self.counter = self.counter + msg.number;
-        send(SendParameters{
-            to: sender(),
-            value: 0, 
-            mode: SendRemainingValue + SendIgnoreErrors,
-            body: "add".asComment()
-        });
+        self.reply(Res{isTrue: true}.toCell());
     }
     
     receive(msg: Subtract) {
         self.counter = self.counter - msg.number;
-    send(SendParameters{
-            to: sender(),
-            value: 0, 
-            mode: SendRemainingValue + SendIgnoreErrors,
-            body: "subtract".asComment()
-        });
+        self.reply(Res{isTrue: true}.toCell());
     }
 
     get fun counter(): Int {
