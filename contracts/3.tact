@@ -101,7 +101,7 @@ contract Task3 with Deployable {
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: pr.left.addr,
+                send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: false,
