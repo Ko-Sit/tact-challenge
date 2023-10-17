@@ -74,7 +74,7 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        let tokenAddr: Address = msg.from;
+        let tokenAddr: Address = sender();
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
