@@ -88,13 +88,42 @@ contract Task3 with Deployable {
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: sender(), value: 0, mode: SendRemainingValue});
+                send(SendParameters{
+                    to: sender(), 
+                    value: 0,
+                    mode: SendRemainingValue, 
+                    bounce: false,
+                    body: TokenTransfer {
+                        queryId: msg.queryId,
+                        amount: msg.amount,
+                        destination: sender(),
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                });
             } else {
                 // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
                 // A-B (amtB * decimal / amtA) * tokenA / decimal
                 let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
                 self.addBalance(pr.left.addr, msg.amount);
                 self.subtractBalance(pr.right.addr, swapped);
+                send(SendParameters{
+                    to: sender(), 
+                    value: 0,
+                    mode: SendRemainingValue, 
+                    bounce: true,
+                    body: TokenTransfer {
+                        queryId: msg.queryId,
+                        amount: swapped,
+                        destination: sender(),
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                });
             }
         }
     }
