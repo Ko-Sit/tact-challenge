@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 /*
   TASK 3 - DEX
   Create a simple jetton dex contract that trades one pair of jettons: A and B.
@@ -48,15 +47,6 @@ message(0xf8a7ea5) TokenTransfer {
     forwardTonAmount: Int as coins; // should be ton("0.01")
     forwardPayload: Slice as remaining; // should be emptySlice()
 }
-message Pair {
-    left: Pool;
-    right: Pool;
-}
-// todo move pool to contract
-message Pool {
-    amt: Int;
-    addr: Address;
-}
 
 contract Task3 with Deployable {
     owner: Address;
@@ -74,107 +64,16 @@ contract Task3 with Deployable {
         self.decimal = 1000000000;
     }
 
-    receive(msg: TokenNotification){
-        let tokenAddr: Address = msg.from;
-        // check if jetton a or b
-        let pr: Pair = self.getPair(tokenAddr);
-        // top up for admins
-        if (sender() == self.owner) {
-            if (tokenAddr == self.jettonAddressA) {
-                self.aAmount = pr.left.amt + msg.amount;
-            } else {
-                self.bAmount = pr.left.amt + msg.amount;
-            }
-        } else {
-            // check if incoming < jetton available
-            if (pr.left.amt < msg.amount) {
-                send(SendParameters{
-                    to: sender(), 
-                    value: 0,
-                    mode: SendRemainingValue, 
-                    bounce: false,
-                    body: TokenTransfer {
-                        queryId: msg.queryId,
-                        amount: msg.amount,
-                        destination: sender(),
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                });
-            } else {
-                // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
-                // A-B (amtB * decimal / amtA) * tokenA / decimal
-                let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
-                self.addBalance(pr.left.addr, msg.amount);
-                self.subtractBalance(pr.right.addr, swapped);
-                send(SendParameters{
-                    to: sender(), 
-                    value: 0,
-                    mode: SendRemainingValue, 
-                    bounce: true,
-                    body: TokenTransfer {
-                        queryId: msg.queryId,
-                        amount: swapped,
-                        destination: sender(),
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                });
-            }
-        }
-    }
+    receive(msg: TokenNotification){}
 
     get fun price(jetton: Address): Int {
-        let pr: Pair = self.getPair(jetton);
-        return pr.left.amt * self.decimal / pr.right.amt;
-    }
-
-     fun getPair(from: Address): Pair {
-        let left: Pool = self.getPool(from);
-        let right: Pool = self.getPool(self.jettonAddressB);
-        if (left.addr == self.jettonAddressB) {
-            right = self.getPool(self.jettonAddressA);
-        } else if (left.addr == self.jettonAddressA) {
-            right = self.getPool(self.jettonAddressB);
-        } else {
-            throw(0x101);
-        }
-        return Pair{left: left, right: right};
-    }
-
-     fun getPool(jetton: Address): Pool {
-        let pl: Pool = Pool{amt: self.aAmount, addr: jetton};
-        if (jetton == self.jettonAddressA) {
-            return pl;
-        } else if (jetton == self.jettonAddressB) {
-            return Pool{amt: self.bAmount, addr: jetton};
-        } else {
-            throw(0x100);
-        }
-        return pl;
-    }
-
-    fun addBalance(jetton: Address, amt: Int) {
-        if (jetton == self.jettonAddressA) {
-            self.aAmount = self.aAmount + amt;
-        } else {
-            self.bAmount = self.bAmount + amt;
-        }
-    }
-
-    fun subtractBalance(jetton: Address, amt: Int) {
-        if (jetton == self.jettonAddressA) {
-            self.aAmount = self.aAmount - amt;
-        } else {
-            self.bAmount = self.bAmount - amt;
-        }
+        return 0;
     }
 
     get fun balance(jetton: Address): Int {
-        return self.getPool(jetton).amt;
+        if (jetton == self.jettonAddressA) {
+            return self.aAmount;
+        }
+        return self.bAmount;
     }
 }
