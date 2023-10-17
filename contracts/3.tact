@@ -74,7 +74,7 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        let tokenAddr: Address = context().sender;
+        let tokenAddr: Address = msg.from;
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
@@ -87,13 +87,13 @@ contract Task3 with Deployable {
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: sender(),
+                send(SendParameters{to: context().sender,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: false,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
-                            destination: sender(),
+                            destination: context().sender,
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
@@ -107,13 +107,13 @@ contract Task3 with Deployable {
                 let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
                 self.addBalance(pr.left.addr, msg.amount);
                 self.subtractBalance(pr.right.addr, swapped);
-                send(SendParameters{to: sender(),
+                send(SendParameters{to: context().sender,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
-                            destination: sender(),
+                            destination: context().sender,
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
@@ -176,7 +176,7 @@ contract Task3 with Deployable {
     get fun price(jetton: Address): Int {
         let pr: Pair = self.getPair(jetton);
         if (pr.left.amt == 0 || pr.right.amt == 0) {
-            throw(1483);
+            return 0;
         }
         return pr.right.amt * self.decimal / pr.left.amt;
     }
