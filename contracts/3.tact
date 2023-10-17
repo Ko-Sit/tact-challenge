@@ -84,16 +84,30 @@ contract Task3 with Deployable {
             } else {
                 self.bAmount = pr.left.amt + msg.amount;
             }
+            send(SendParameters{to: pr.left.addr,
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: false,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: msg.amount,
+                        destination: context().sender,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: context().sender,
+                send(SendParameters{to: pr.left.addr,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: false,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
-                            destination: context().sender,
+                            destination: sender(),
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
@@ -107,13 +121,13 @@ contract Task3 with Deployable {
                 let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
                 self.addBalance(pr.left.addr, msg.amount);
                 self.subtractBalance(pr.right.addr, swapped);
-                send(SendParameters{to: context().sender,
+                send(SendParameters{to: pr.right.addr,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
-                            destination: context().sender,
+                            destination: sender(),
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
