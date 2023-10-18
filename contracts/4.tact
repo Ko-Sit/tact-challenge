@@ -53,13 +53,13 @@ contract Task4 with Deployable {
     }
 
      fun alreadyInitialized(msg: OwnershipAssigned) {
-        send(SendParameters{to: context().sender,
+        send(SendParameters{to: sender(),
                 bounce: true,
                 value: 0,
                 mode: SendRemainingValue,
                 body: Transfer{queryId: msg.queryId,
                     newOwner: msg.prevOwner,
-                    responseDestination: msg.prevOwner,
+                    responseDestination: sender(),
                     customPayload: null,
                     forwardAmount: 0,
                     forwardPayload: msg.forwardPayload
@@ -89,13 +89,13 @@ contract Task4 with Deployable {
             self.alreadyInitialized(msg);
         } else {
             self.owner = msg.prevOwner;
-            self.nftAddress = context().sender;
+            self.nftAddress = sender();
             self.releaseTime = now() + msg.forwardPayload.loadUint(32);
         }
     }
 
     receive(msg: NftWithdrawal){
-        require(context().sender == self.owner, "Invalid sender");
+        require(sender() == self.owner, "Invalid sender");
         if (self.time() > 0) {
             self.reply("NFT is still locked".asComment());
         } else {
@@ -107,7 +107,7 @@ contract Task4 with Deployable {
         if (self.releaseTime != null) {
             return self.releaseTime!! - now();
         }
-        return 0;
+        return 1;
     }
 
     get fun nft(): Address? {

@@ -94,7 +94,7 @@ contract Task3 with Deployable {
                         destination: msg.from,
                         responseDestination: msg.from,
                         customPayload: null,
-                        forwardTonAmount: ton("0.01"),
+                        forwardTonAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
                 }
@@ -189,14 +189,12 @@ contract Task3 with Deployable {
     } 
 
     get fun balance(jetton: Address): Int {
-        self.validateJetton(jetton);
         let amt: Int = self.getPool(jetton).amt;
         return amt;
     }
     
 
     get fun price(jetton: Address): Int {
-        self.validateJetton(jetton);
         let pr: Pair = self.getPair(jetton);
         if (pr.left.amt == 0 || pr.right.amt == 0) {
             return 0;
