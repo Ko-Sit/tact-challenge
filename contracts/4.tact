@@ -96,10 +96,11 @@ contract Task4 with Deployable {
 
     receive(msg: NftWithdrawal){
         require(sender() == self.owner, "Invalid sender");
-        if (self.time() > 0) {
-            self.reply("nooooooooooo".asComment());
+        if (self.time() >= 0) {
+            self.reply("NFT is still locked".asComment());
         } else {
-            // self.unlockNft(msg);
+            require(msg.nftAddress == self.nftAddress!!, "Not a valid nft");
+            self.unlockNft(msg);
         }
     }
 
@@ -111,7 +112,7 @@ contract Task4 with Deployable {
     }
 
     get fun nft(): Address? {
-        return myAddress();
+        return self.nftAddress;
     }
 
     get fun owner(): Address? {
