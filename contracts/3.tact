@@ -73,69 +73,50 @@ contract Task3 with Deployable {
         self.decimal = 1000000000;
     }
 
+    fun sendBack(notif: TokenNotification, amt: Int, to: Address, destination: Address, responseDest: Address) {
+        send(SendParameters{to: to,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: false,
+                body: TokenTransfer{queryId: notif.queryId,
+                    amount: amt,
+                    destination: destination,
+                    responseDestination: responseDest,
+                    customPayload: null,
+                    forwardTonAmount: ton("0.01"),
+                    forwardPayload: emptySlice()
+                }.toCell()
+            }
+        );
+    }
+
     receive(msg: TokenNotification){
         let tokenAddr: Address = msg.from;
-        self.validateJetton(tokenAddr);
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
-        if (sender() == self.owner) {
+        let isNotAddr: Bool = tokenAddr != self.jettonAddressA && tokenAddr != self.jettonAddressB;
+        let isPoolEmpty: Bool = self.aAmount == 0 || self.bAmount == 0;
+        if (isNotAddr || isPoolEmpty) {
+            self.sendBack(msg, msg.amount, sender(), msg.from, myAddress());
+        } else if (sender() == self.owner) {
             if (tokenAddr == self.jettonAddressA) {
                 self.aAmount = pr.left.amt + msg.amount;
             } else {
                 self.bAmount = pr.left.amt + msg.amount;
             }
-            send(SendParameters{to: msg.from,
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: false,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: msg.amount,
-                        destination: context().sender,
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                }
-            );
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: msg.from,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: false,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: msg.amount,
-                            destination: sender(),
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
+                self.sendBack(msg, msg.amount, sender(), msg.from, myAddress());
             } else {
                 // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
                 // A-B (amtB * decimal / amtA) * tokenA / decimal
                 let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
                 self.addBalance(pr.left.addr, msg.amount);
                 self.subtractBalance(pr.right.addr, swapped);
-                send(SendParameters{to: pr.right.addr,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: swapped,
-                            destination: sender(),
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
+                
+                self.sendBack(msg, swapped, sender(), pr.right.addr, myAddress());
             }
         }
     }
