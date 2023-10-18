@@ -53,35 +53,35 @@ contract Task4 with Deployable {
     }
 
      fun alreadyInitialized(msg: OwnershipAssigned) {
-        // send(SendParameters{to: sender(),
-        //         bounce: true,
-        //         value: 0,
-        //         mode: SendRemainingValue,
-        //         body: Transfer{queryId: msg.queryId,
-        //             newOwner: msg.prevOwner,
-        //             responseDestination: sender(),
-        //             customPayload: null,
-        //             forwardAmount: 0,
-        //             forwardPayload: msg.forwardPayload
-        //         }.toCell()
-        //     }
-        // );
-    }
-
-     fun unlockNft(msg: NftWithdrawal) {
-        send(SendParameters{to: self.owner!!,
+        send(SendParameters{to: sender(),
                 bounce: true,
-                mode: SendRemainingValue,
                 value: 0,
+                mode: SendRemainingValue,
                 body: Transfer{queryId: msg.queryId,
-                    newOwner: self.nftAddress!!,
-                    responseDestination: msg.nftAddress,
+                    newOwner: msg.prevOwner,
+                    responseDestination: sender(),
                     customPayload: null,
                     forwardAmount: 0,
-                    forwardPayload: emptySlice()
+                    forwardPayload: msg.forwardPayload
                 }.toCell()
             }
         );
+    }
+
+     fun unlockNft(msg: NftWithdrawal) {
+        // send(SendParameters{to: self.owner!!,
+        //         bounce: true,
+        //         mode: SendRemainingValue,
+        //         value: 0,
+        //         body: Transfer{queryId: msg.queryId,
+        //             newOwner: self.nftAddress!!,
+        //             responseDestination: msg.nftAddress,
+        //             customPayload: null,
+        //             forwardAmount: 0,
+        //             forwardPayload: emptySlice()
+        //         }.toCell()
+        //     }
+        // );
     }
 
     receive(msg: OwnershipAssigned){
