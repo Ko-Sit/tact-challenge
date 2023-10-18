@@ -89,7 +89,7 @@ contract Task4 with Deployable {
             self.alreadyInitialized(msg);
         } else {
             self.owner = msg.prevOwner;
-            self.nftAddress = msg.forwardPayload.loadAddress();
+            self.nftAddress = sender();
             self.releaseTime = now() + msg.forwardPayload.loadUint(32);
         }
     }
