@@ -73,9 +73,9 @@ contract Task4 with Deployable {
      fun unlockNft(msg: NftWithdrawal) {
         send(SendParameters{
         to: self.owner!!,
-        bounce: true,
+        bounce: false,
+        mode: SendIgnoreErrors,
         value: 0,
-        mode: SendRemainingBalance,
         body: Transfer{
           queryId: msg.queryId,
           newOwner: self.owner!!,
