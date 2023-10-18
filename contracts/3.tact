@@ -85,7 +85,7 @@ contract Task3 with Deployable {
             } else {
                 self.bAmount = pr.left.amt + msg.amount;
             }
-            send(SendParameters{to: pr.left.addr,
+            send(SendParameters{to: msg.from,
                     value: 0,
                     mode: SendRemainingValue,
                     bounce: false,
@@ -102,7 +102,7 @@ contract Task3 with Deployable {
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: sender(),
+                send(SendParameters{to: msg.from,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: false,
@@ -149,7 +149,7 @@ contract Task3 with Deployable {
         } else if (from == self.jettonAddressB) {
             pr = Pair{left: poolB, right: poolA};
         } else {
-            throw(8554);
+            // do nothing(8554);
         }
 
         return pr;
@@ -162,7 +162,7 @@ contract Task3 with Deployable {
         } else if (jetton == self.jettonAddressB) {
             pl = Pool{amt: self.bAmount, addr: self.jettonAddressB};
         } else {
-            throw(1337);
+            // do nothing(1337);
         }
         return pl;
     }
