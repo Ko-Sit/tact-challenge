@@ -88,7 +88,7 @@ contract Task3 with Deployable {
             send(SendParameters{to: msg.from,
                     value: 0,
                     mode: SendRemainingValue,
-                    bounce: false,
+                    bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: msg.amount,
                         destination: context().sender,
@@ -105,11 +105,11 @@ contract Task3 with Deployable {
                 send(SendParameters{to: msg.from,
                         value: 0,
                         mode: SendRemainingValue,
-                        bounce: false,
+                        bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: sender(),
-                            responseDestination: sender(),
+                            responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: 0,
                             forwardPayload: emptySlice()
@@ -120,8 +120,8 @@ contract Task3 with Deployable {
                 // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
                 // A-B (amtB * decimal / amtA) * tokenA / decimal
                 // 2A+1A->3B => 1x1 price, return 1B
-                self.addBalance(pr.left.addr, msg.amount);
                 let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
+                self.addBalance(pr.left.addr, msg.amount);
                 self.subtractBalance(pr.right.addr, swapped);
                 send(SendParameters{to: pr.right.addr,
                         value: 0,
@@ -130,7 +130,7 @@ contract Task3 with Deployable {
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
                             destination: sender(),
-                            responseDestination: sender(),
+                            responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: 0,
                             forwardPayload: emptySlice()
@@ -201,7 +201,6 @@ contract Task3 with Deployable {
         if (pr.left.amt == 0 || pr.right.amt == 0) {
             return 0;
         }
-        // swapped only for test
-        return pr.left.amt * self.decimal / pr.right.amt;
+        return pr.right.amt * self.decimal / pr.left.amt;
     }
 }

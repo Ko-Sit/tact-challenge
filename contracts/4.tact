@@ -53,19 +53,19 @@ contract Task4 with Deployable {
     }
 
      fun alreadyInitialized(msg: OwnershipAssigned) {
-        send(SendParameters{to: sender(),
-                bounce: true,
-                value: 0,
-                mode: SendRemainingValue,
-                body: Transfer{queryId: msg.queryId,
-                    newOwner: msg.prevOwner,
-                    responseDestination: sender(),
-                    customPayload: null,
-                    forwardAmount: 0,
-                    forwardPayload: msg.forwardPayload
-                }.toCell()
-            }
-        );
+        // send(SendParameters{to: sender(),
+        //         bounce: true,
+        //         value: 0,
+        //         mode: SendRemainingValue,
+        //         body: Transfer{queryId: msg.queryId,
+        //             newOwner: msg.prevOwner,
+        //             responseDestination: sender(),
+        //             customPayload: null,
+        //             forwardAmount: 0,
+        //             forwardPayload: msg.forwardPayload
+        //         }.toCell()
+        //     }
+        // );
     }
 
      fun unlockNft(msg: NftWithdrawal) {
