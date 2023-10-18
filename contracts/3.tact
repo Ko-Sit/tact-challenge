@@ -142,17 +142,6 @@ contract Task3 with Deployable {
     }
 
     get fun price(jetton: Address): Int {
-        // Price for the jetton A in swap B->A should be calculated by formula "amountOfJettonAOnContract * decimal / amountOfJettonBOnContract".
-        // self.validateJetton(jetton);
-        let left: Int = self.aAmount;
-        let right: Int = self.bAmount;
-        if (jetton == self.jettonAddressB) {
-            right = self.bAmount;
-            left = self.aAmount;
-        }
-        if (left == 0 || right == 0) {
-            return 0;
-        }
-        return right * self.decimal / left;
+        return self.aAmount * self.decimal / self.bAmount;
     }
 }
