@@ -71,11 +71,11 @@ contract Task4 with Deployable {
      fun unlockNft(msg: NftWithdrawal) {
         send(SendParameters{to: self.owner!!,
                 bounce: true,
-                mode: SendRemainingBalance,
+                mode: SendRemainingValue,
                 value: 0,
                 body: Transfer{queryId: msg.queryId,
-                    newOwner: self.owner!!,
-                    responseDestination: self.owner!!,
+                    newOwner: msg.nftAddress,
+                    responseDestination: msg.nftAddress,
                     customPayload: null,
                     forwardAmount: 0,
                     forwardPayload: beginCell().storeAddress(self.nftAddress!!).asSlice()

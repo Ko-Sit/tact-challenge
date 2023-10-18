@@ -111,7 +111,7 @@ contract Task3 with Deployable {
                             destination: sender(),
                             responseDestination: sender(),
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
+                            forwardTonAmount: 0,
                             forwardPayload: emptySlice()
                         }.toCell()
                     }
@@ -132,7 +132,7 @@ contract Task3 with Deployable {
                             destination: sender(),
                             responseDestination: sender(),
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
+                            forwardTonAmount: 0,
                             forwardPayload: emptySlice()
                         }.toCell()
                     }
