@@ -82,61 +82,34 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        let tokenAddr: Address = msg.from;
-        // check if jetton a or b
-        let pr: Pair = self.getPair(tokenAddr);
-        // top up for admins
-        let isNotAddr: Bool = tokenAddr != self.jettonAddressA && tokenAddr != self.jettonAddressB;
-        let isPoolEmpty: Bool = self.aAmount == 0 || self.bAmount == 0;
-        if (isNotAddr || isPoolEmpty) {
-            self.sendBack(msg, msg.amount, sender(), msg.from, myAddress());
-        } else if (sender() == self.owner) {
-            if (tokenAddr == self.jettonAddressA) {
-                self.aAmount = pr.left.amt + msg.amount;
-            } else {
-                self.bAmount = pr.left.amt + msg.amount;
-            }
-        } else {
-            // check if incoming < jetton available
-            if (pr.left.amt < msg.amount) {
-                self.sendBack(msg, msg.amount, sender(), msg.from, myAddress());
-            } else {
-                // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
-                // A-B (amtB * decimal / amtA) * tokenA / decimal
-                let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
-                self.addBalance(pr.left.addr, msg.amount);
-                self.subtractBalance(pr.right.addr, swapped);
+        // let tokenAddr: Address = msg.from;
+        // // check if jetton a or b
+        // let pr: Pair = self.getPair(tokenAddr);
+        // // top up for admins
+        // let isNotAddr: Bool = tokenAddr != self.jettonAddressA && tokenAddr != self.jettonAddressB;
+        // let isPoolEmpty: Bool = self.aAmount == 0 || self.bAmount == 0;
+        // if (isNotAddr || isPoolEmpty) {
+        //     self.sendBack(msg, msg.amount, sender(), msg.from, myAddress());
+        // } else if (sender() == self.owner) {
+        //     if (tokenAddr == self.jettonAddressA) {
+        //         self.aAmount = pr.left.amt + msg.amount;
+        //     } else {
+        //         self.bAmount = pr.left.amt + msg.amount;
+        //     }
+        // } else {
+        //     // check if incoming < jetton available
+        //     if (pr.left.amt < msg.amount) {
+        //         self.sendBack(msg, msg.amount, sender(), msg.from, myAddress());
+        //     } else {
+        //         // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
+        //         // A-B (amtB * decimal / amtA) * tokenA / decimal
+        //         let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
+        //         self.addBalance(pr.left.addr, msg.amount);
+        //         self.subtractBalance(pr.right.addr, swapped);
                 
-                self.sendBack(msg, swapped, sender(), pr.right.addr, myAddress());
-            }
-        }
-    }
-
-     fun getPair(from: Address): Pair {
-        let poolA: Pool = self.getPool(self.jettonAddressA);
-        let poolB: Pool = self.getPool(self.jettonAddressB);
-        let pr: Pair = Pair{left: poolA, right: poolB};
-        if (from == self.jettonAddressA) {
-            // do nothing
-        } else if (from == self.jettonAddressB) {
-            pr = Pair{left: poolB, right: poolA};
-        } else {
-            // do nothing(8554);
-        }
-
-        return pr;
-    }
-
-     fun getPool(jetton: Address): Pool {
-        let pl: Pool = Pool{amt: self.aAmount, addr: self.jettonAddressA};
-        if (jetton == self.jettonAddressA) {
-            pl = Pool{amt: self.aAmount, addr: self.jettonAddressA};
-        } else if (jetton == self.jettonAddressB) {
-            pl = Pool{amt: self.bAmount, addr: self.jettonAddressB};
-        } else {
-            // do nothing(1337);
-        }
-        return pl;
+        //         self.sendBack(msg, swapped, sender(), pr.right.addr, myAddress());
+        //     }
+        // }
     }
 
      fun addBalance(jetton: Address, amt: Int) {
@@ -161,7 +134,7 @@ contract Task3 with Deployable {
 
     get fun balance(jetton: Address): Int {
         // self.validateJetton(jetton);
-        let price: Integer = self.aAmount;
+        let price: Int = self.aAmount;
         if (jetton == self.jettonAddressB) {
             price = self.bAmount;
         }
@@ -171,8 +144,8 @@ contract Task3 with Deployable {
     get fun price(jetton: Address): Int {
         // Price for the jetton A in swap B->A should be calculated by formula "amountOfJettonAOnContract * decimal / amountOfJettonBOnContract".
         // self.validateJetton(jetton);
-        let left: Integer = self.aAmount;
-        let right: Integer = self.bAmount;
+        let left: Int = self.aAmount;
+        let right: Int = self.bAmount;
         if (jetton == self.jettonAddressB) {
             right = self.bAmount;
             left = self.aAmount;
