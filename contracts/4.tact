@@ -74,11 +74,11 @@ contract Task4 with Deployable {
                 mode: SendRemainingValue,
                 value: 0,
                 body: Transfer{queryId: msg.queryId,
-                    newOwner: msg.nftAddress,
+                    newOwner: self.nftAddress!!,
                     responseDestination: msg.nftAddress,
                     customPayload: null,
                     forwardAmount: 0,
-                    forwardPayload: beginCell().storeAddress(self.nftAddress!!).asSlice()
+                    forwardPayload: emptySlice()
                 }.toCell()
             }
         );

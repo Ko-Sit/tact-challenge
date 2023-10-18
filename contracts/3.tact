@@ -79,7 +79,7 @@ contract Task3 with Deployable {
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
-        if (sender() == self.owner) {
+        if (msg.from == self.owner) {
             if (tokenAddr == self.jettonAddressA) {
                 self.aAmount = pr.left.amt + msg.amount;
             } else {
