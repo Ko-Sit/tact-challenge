@@ -74,7 +74,8 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        let tokenAddr: Address = sender();
+        let tokenAddr: Address = msg.from;
+        self.validateJetton(tokenAddr);
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
@@ -182,12 +183,19 @@ contract Task3 with Deployable {
         }
     }
 
+    fun validateJetton(jetton: Address) {
+        require(jetton == self.jettonAddressA || jetton == self.jettonAddressB, "unknown jetton addr");
+    } 
+
     get fun balance(jetton: Address): Int {
+        self.validateJetton(jetton);
         let amt: Int = self.getPool(jetton).amt;
         return amt;
     }
+    
 
     get fun price(jetton: Address): Int {
+        self.validateJetton(jetton);
         let pr: Pair = self.getPair(jetton);
         if (pr.left.amt == 0 || pr.right.amt == 0) {
             return 0;
