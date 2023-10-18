@@ -47,8 +47,7 @@ message NftWithdrawal {
 contract Task4 with Deployable {
     seed: Int as uint128;
     nftAddress: Address?;
-    lockedAt: Int?;
-    lockPeriod: Int?;
+    releaseTime: Int?;
     owner: Address?;
     init(seed: Int){
         self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
@@ -94,8 +93,7 @@ contract Task4 with Deployable {
         } else {
             self.owner = msg.prevOwner;
             self.nftAddress = msg.forwardPayload.loadAddress();
-            self.lockPeriod = msg.forwardPayload.loadUint(32);
-            self.lockedAt = now();
+            self.releaseTime = msg.forwardPayload.loadUint(32);
         }
     }
 
@@ -109,8 +107,8 @@ contract Task4 with Deployable {
     }
 
     get fun time(): Int {
-        if (self.lockedAt != null && self.lockPeriod != null) {
-            return self.lockedAt!! + self.lockPeriod!! - now();
+        if (self.releaseTime != null) {
+            return self.releaseTime!! - now();
         }
         return 0;
     }
