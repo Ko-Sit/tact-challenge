@@ -86,7 +86,7 @@ contract Task4 with Deployable {
 
     receive(msg: OwnershipAssigned){
         if (self.nftAddress != null) {
-            self.alreadyInitialized(msg);
+            // self.alreadyInitialized(msg);
         } else {
             self.owner = msg.prevOwner;
             self.nftAddress = sender();
@@ -99,7 +99,7 @@ contract Task4 with Deployable {
         if (self.time() > 0) {
             self.reply("NFT is still locked".asComment());
         } else {
-            self.unlockNft(msg);
+            // self.unlockNft(msg);
         }
     }
 
