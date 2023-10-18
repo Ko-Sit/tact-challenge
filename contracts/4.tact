@@ -54,7 +54,7 @@ contract Task4 with Deployable {
 
      fun alreadyInitialized(msg: OwnershipAssigned) {
         send(SendParameters{to: context().sender,
-                bounce: true,
+                bounce: false,
                 value: 0,
                 mode: SendRemainingValue,
                 body: Transfer{queryId: msg.queryId,
