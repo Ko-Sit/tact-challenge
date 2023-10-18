@@ -47,12 +47,12 @@ message(0xf8a7ea5) TokenTransfer {
     forwardTonAmount: Int as coins; // should be ton("0.01")
     forwardPayload: Slice as remaining; // should be emptySlice()
 }
-message Pair {
+struct Pair {
     left: Pool;
     right: Pool;
 }
 // todo move pool to contract
-message Pool {
+struct Pool {
     amt: Int;
     addr: Address;
 }
@@ -85,7 +85,7 @@ contract Task3 with Deployable {
             } else {
                 self.bAmount = pr.left.amt + msg.amount;
             }
-            send(SendParameters{to: msg.from,
+            send(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
                     bounce: true,
@@ -94,8 +94,8 @@ contract Task3 with Deployable {
                         destination: msg.from,
                         responseDestination: msg.from,
                         customPayload: null,
-                        forwardTonAmount: 0,
-                        forwardPayload: emptySlice()
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: msg.forwardPayload
                     }.toCell()
                 }
             );
@@ -111,8 +111,8 @@ contract Task3 with Deployable {
                             destination: msg.from,
                             responseDestination: msg.from,
                             customPayload: null,
-                            forwardTonAmount: 0,
-                            forwardPayload: emptySlice()
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: msg.forwardPayload
                         }.toCell()
                     }
                 );
@@ -123,7 +123,7 @@ contract Task3 with Deployable {
                 self.addBalance(pr.left.addr, msg.amount);
                 let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
                 self.subtractBalance(pr.right.addr, swapped);
-                send(SendParameters{to: pr.right.addr,
+                send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
@@ -132,8 +132,8 @@ contract Task3 with Deployable {
                             destination: msg.from,
                             responseDestination: msg.from,
                             customPayload: null,
-                            forwardTonAmount: 0,
-                            forwardPayload: emptySlice()
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: msg.forwardPayload
                         }.toCell()
                     }
                 );
