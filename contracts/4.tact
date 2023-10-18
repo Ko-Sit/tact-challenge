@@ -55,7 +55,7 @@ contract Task4 with Deployable {
 
     fun alreadyInitialized(msg: OwnershipAssigned) {
         send(SendParameters{
-        to: msg.prevOwner,
+        to: context().sender,
         bounce: true,
         value: 0,
         mode: SendRemainingValue,
@@ -98,7 +98,7 @@ contract Task4 with Deployable {
     }
 
     receive(msg: NftWithdrawal){
-        require(sender() == self.owner, "Invalid sender");
+        require(context().sender == self.owner, "Invalid sender");
         if (self.time() > 0) {
             self.reply("NFT is still locked".asComment());
         } else {
