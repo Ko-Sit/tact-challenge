@@ -1,4 +1,5 @@
 import "@stdlib/deploy";
+
 /*
   TASK 4 - NFT locker
   Implement a smart contract that will lock NFT for a period of time specified by the owner.
@@ -45,26 +46,47 @@ message NftWithdrawal {
 
 contract Task4 with Deployable {
     seed: Int as uint128;
-    nftAddress: Address?; 
+    nftAddress: Address?;
     lockedAt: Int?;
     lockPeriod: Int?;
-    owner: Address?; 
+    owner: Address?;
     init(seed: Int){
         self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     }
 
+    fun sendBack(msg: OwnershipAssigned) {
+        send(SendParameters{
+        to: msg.prevOwner,
+        bounce: true,
+        value: 0,
+        mode: SendRemainingValue,
+        body: Transfer{
+          queryId: msg.queryId,
+          newOwner: msg.prevOwner,
+          responseDestination: myAddress(),
+          customPayload: null,
+          forwardAmount: 0,
+          forwardPayload: msg.forwardPayload
+        }.toCell()
+      });
+    }
+
     receive(msg: OwnershipAssigned){
-        self.owner = msg.prevOwner;
-        self.nftAddress = msg.forwardPayload.loadAddress();
-        self.lockPeriod = msg.forwardPayload.loadUint(32);
-        self.lockedAt = now();
+        if (self.nftAddress != null) {
+            self.sendBack(msg);
+        } else {
+            self.owner = msg.prevOwner;
+            self.nftAddress = msg.forwardPayload.loadAddress();
+            self.lockPeriod = msg.forwardPayload.loadUint(32);
+            self.lockedAt = now();
+        }
     }
 
     receive(msg: NftWithdrawal){}
 
     get fun time(): Int {
-        if (self.lockedAt != null) {
-            return now() - self.lockedAt!!;
+        if (self.lockedAt != null && self.lockPeriod != null) {
+            return self.lockedAt!! + self.lockPeriod!! - now();
         }
         return 0;
     }
