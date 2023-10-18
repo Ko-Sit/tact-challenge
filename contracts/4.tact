@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 /*
   TASK 4 - NFT locker
   Implement a smart contract that will lock NFT for a period of time specified by the owner.
@@ -53,38 +52,36 @@ contract Task4 with Deployable {
         self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     }
 
-    fun alreadyInitialized(msg: OwnershipAssigned) {
-        send(SendParameters{
-        to: context().sender,
-        bounce: true,
-        value: 0,
-        mode: SendRemainingValue,
-        body: Transfer{
-          queryId: msg.queryId,
-          newOwner: msg.prevOwner,
-          responseDestination: myAddress(),
-          customPayload: null,
-          forwardAmount: 0,
-          forwardPayload: msg.forwardPayload
-        }.toCell()
-      });
+     fun alreadyInitialized(msg: OwnershipAssigned) {
+        send(SendParameters{to: context().sender,
+                bounce: true,
+                value: 0,
+                mode: SendRemainingValue,
+                body: Transfer{queryId: msg.queryId,
+                    newOwner: msg.prevOwner,
+                    responseDestination: myAddress(),
+                    customPayload: null,
+                    forwardAmount: 0,
+                    forwardPayload: msg.forwardPayload
+                }.toCell()
+            }
+        );
     }
 
      fun unlockNft(msg: NftWithdrawal) {
-        send(SendParameters{
-        to: self.owner!!,
-        bounce: false,
-        mode: SendIgnoreErrors,
-        value: 0,
-        body: Transfer{
-          queryId: msg.queryId,
-          newOwner: self.owner!!,
-          responseDestination: myAddress(),
-          customPayload: null,
-          forwardAmount: 0,
-          forwardPayload: beginCell().storeAddress(self.nftAddress!!).asSlice()
-        }.toCell()
-      });
+        send(SendParameters{to: self.owner!!,
+                bounce: true,
+                mode: SendRemainingBalance,
+                value: 0,
+                body: Transfer{queryId: msg.queryId,
+                    newOwner: self.owner!!,
+                    responseDestination: myAddress(),
+                    customPayload: null,
+                    forwardAmount: 0,
+                    forwardPayload: beginCell().storeAddress(self.nftAddress!!).asSlice()
+                }.toCell()
+            }
+        );
     }
 
     receive(msg: OwnershipAssigned){
