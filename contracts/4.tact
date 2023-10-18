@@ -70,7 +70,7 @@ contract Task4 with Deployable {
 
      fun unlockNft(msg: NftWithdrawal) {
         send(SendParameters{to: self.owner!!,
-                bounce: true,
+                bounce: false,
                 mode: SendRemainingBalance,
                 value: 0,
                 body: Transfer{queryId: msg.queryId,
@@ -90,7 +90,7 @@ contract Task4 with Deployable {
         } else {
             self.owner = msg.prevOwner;
             self.nftAddress = sender();
-            self.releaseTime = msg.forwardPayload.loadUint(32);
+            self.releaseTime = now() + msg.forwardPayload.loadUint(32);
         }
     }
 
@@ -107,7 +107,7 @@ contract Task4 with Deployable {
         if (self.releaseTime != null) {
             return self.releaseTime!! - now();
         }
-        return 1;
+        return 0;
     }
 
     get fun nft(): Address? {
