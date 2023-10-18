@@ -47,15 +47,6 @@ message(0xf8a7ea5) TokenTransfer {
     forwardTonAmount: Int as coins; // should be ton("0.01")
     forwardPayload: Slice as remaining; // should be emptySlice()
 }
-message Pair {
-    left: Pool;
-    right: Pool;
-}
-// todo move pool to contract
-message Pool {
-    amt: Int;
-    addr: Address;
-}
 
 contract Task3 with Deployable {
     owner: Address;
@@ -176,11 +167,17 @@ contract Task3 with Deployable {
     
 
     get fun price(jetton: Address): Int {
+        // Price for the jetton A in swap B->A should be calculated by formula "amountOfJettonAOnContract * decimal / amountOfJettonBOnContract".
         self.validateJetton(jetton);
-        let pr: Pair = self.getPair(jetton);
-        if (pr.left.amt == 0 || pr.right.amt == 0) {
+        let left: Integer = self.aAmount;
+        let right: Integer = self.bAmount;
+        if (jetton == self.jettonAddressB) {
+            right = self.bAmount;
+            left = self.aAmount;
+        }
+        if (left == 0 || right == 0) {
             return 0;
         }
-        return pr.right.amt * self.decimal / pr.left.amt;
+        return right * self.decimal / left;
     }
 }
