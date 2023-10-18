@@ -108,7 +108,7 @@ contract Task4 with Deployable {
         if (self.releaseTime != null) {
             return self.releaseTime!! - now();
         }
-        return 1;
+        return 0;
     }
 
     get fun nft(): Address? {
