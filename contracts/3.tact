@@ -61,7 +61,7 @@ contract Task3 with Deployable {
                 }
             );
         } else {
-            if (msg.amount > self.balance(self.jettonAddressA)) {
+            if (msg.amount > self.aAmount) {
                 send(SendParameters{to: self.jettonAddressA,
                         value: 0,
                         mode: SendRemainingValue,
@@ -77,7 +77,7 @@ contract Task3 with Deployable {
                     }
                 );
             } else {
-                let swapped: Int = self.price(self.jettonAddressA) * msg.amount / self.decimal;
+                let swapped: Int = self.bAmount * self.decimal / self.aAmount * msg.amount / self.decimal;
                 // send swapped to second address
                 self.aAmount = self.aAmount + msg.amount;
                 // subtract
@@ -119,7 +119,7 @@ contract Task3 with Deployable {
                 }
             );
         } else {
-            if (msg.amount > self.balance(self.jettonAddressB)) {
+            if (msg.amount > self.bAmount) {
                 send(SendParameters{to: self.jettonAddressB,
                         value: 0,
                         mode: SendRemainingValue,
@@ -135,7 +135,7 @@ contract Task3 with Deployable {
                     }
                 );
             } else {
-                let swapped: Int = self.price(self.jettonAddressB) * msg.amount / self.decimal;
+                let swapped: Int = self.aAmount * self.decimal / self.bAmount * msg.amount / self.decimal;
                 // send swapped to second address
                 self.bAmount = self.bAmount + msg.amount;
                 // subtract
