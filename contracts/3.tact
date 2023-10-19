@@ -35,6 +35,7 @@ contract Task3 with Deployable {
     receive(msg: TokenNotification){
         let leftAddr: Address = sender();
         require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
+        let rightAddr: Address = self.jettonAddressA;
         if (sender() == self.owner) {
             self.addBalance(leftAddr, msg.amount);
             send(SendParameters{to: sender(),
@@ -51,48 +52,48 @@ contract Task3 with Deployable {
                     }.toCell()
                 }
             );
-            return;
-        }
-        // top up for admins
-        // check if incoming < jetton available
-        if (self.balance(leftAddr) < msg.amount) {
-            send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: true,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: msg.amount,
-                        destination: msg.from,
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
+        } else {
+            // top up for admins
+            // check if incoming < jetton available
+            if (self.price(leftAddr) * msg.amount > self.balance(rightAddr)) {
+                send(SendParameters{to: sender(),
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: msg.amount,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
+            } else {
+                
+                if (leftAddr == self.jettonAddressA) {
+                    rightAddr = self.jettonAddressB;
                 }
-            );
-            return;
-        }
-        let rightAddr: Address = self.jettonAddressA;
-        if (leftAddr == self.jettonAddressA) {
-            rightAddr = self.jettonAddressB;
-        }
-        let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
-        self.addBalance(leftAddr, msg.amount);
-        self.subtractBalance(rightAddr, swapped);
-        send(SendParameters{to: rightAddr,
-                value: 0,
-                mode: SendRemainingValue,
-                bounce: true,
-                body: TokenTransfer{queryId: msg.queryId,
-                    amount: swapped,
-                    destination: self.owner,
-                    responseDestination: myAddress(),
-                    customPayload: null,
-                    forwardTonAmount: 0,
-                    forwardPayload: emptySlice()
-                }.toCell()
+                let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
+                self.addBalance(leftAddr, msg.amount);
+                self.subtractBalance(rightAddr, swapped);
+                send(SendParameters{to: rightAddr,
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: swapped,
+                            destination: self.owner,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: 0,
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
             }
-        );
+        }
     }
 
      fun addBalance(jetton: Address, amt: Int) {
