@@ -36,12 +36,13 @@ contract Task3 with Deployable {
         require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "suct");
         let leftAddr: Address = sender();
         let rightAddr: Address = self.jettonAddressA;
-        if (leftAddr == self.jettonAddressA) {
+        let isLeft: Bool = leftAddr == self.jettonAddressA;
+        if (isLeft) {
             rightAddr = self.jettonAddressB;
         }
         // top up for admins
         if (msg.from == self.owner) {
-            self.addBalance(leftAddr, msg.amount);
+            self.addBalance(isLeft, msg.amount);
             self.sendBack(msg.from, 0, msg);
         } else {
             if (msg.amount > self.balance(leftAddr)) {
@@ -49,8 +50,8 @@ contract Task3 with Deployable {
             } else {
                 let swapped: Int = self.price(leftAddr) * msg.amount / self.decimal;
                 // send swapped to second address
-                self.addBalance(leftAddr, msg.amount);
-                self.subtractBalance(rightAddr, swapped);
+                self.addBalance(isLeft, msg.amount);
+                self.subtractBalance(isLeft, swapped);
                 self.sendBack(rightAddr, swapped, msg);
             }
         }
@@ -73,16 +74,16 @@ contract Task3 with Deployable {
         );
     }
 
-     fun addBalance(jetton: Address, amt: Int) {
-        if (jetton == self.jettonAddressA) {
+     fun addBalance(isLeft: Bool, amt: Int) {
+        if (isLeft) {
             self.aAmount = self.aAmount + amt;
         } else {
             self.bAmount = self.bAmount + amt;
         }
     }
 
-     fun subtractBalance(jetton: Address, amt: Int) {
-        if (jetton == self.jettonAddressA) {
+     fun subtractBalance(isLeft: Bool, amt: Int) {
+        if (isLeft) {
             self.aAmount = self.aAmount - amt;
         } else {
             self.bAmount = self.bAmount - amt;
@@ -90,14 +91,14 @@ contract Task3 with Deployable {
     }
 
     get fun balance(jetton: Address): Int {
-        if (jetton == self.jettonAddressA) {
+        if (jetton != self.jettonAddressB) {
             return self.aAmount;
         } 
         return self.bAmount;
     }
 
     get fun price(jetton: Address): Int {
-        if (jetton == self.jettonAddressA) {
+        if (jetton != self.jettonAddressB) {
             return self.bAmount * self.decimal / self.aAmount;
         } 
         return self.aAmount * self.decimal / self.bAmount;
