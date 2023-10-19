@@ -55,13 +55,13 @@ contract Task3 with Deployable {
         } else {
             // check if incoming < jetton available
             if (self.balance(leftAddr) < msg.amount) {
-                send(SendParameters{to: sender(),
+                send(SendParameters{to: msg.from,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
-                            destination: msg.from,
+                            destination: sender(),
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
@@ -77,13 +77,13 @@ contract Task3 with Deployable {
                 let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
                 self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
-                send(SendParameters{to: sender(),
+                send(SendParameters{to: msg.from,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
-                            destination: msg.from,
+                            destination: sender(),
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: 0,
