@@ -45,18 +45,16 @@ contract Task3 with Deployable {
     receive(msg: TokenNotification){
         let tokenAddr: Address = sender();
         require(tokenAddr == self.jettonAddressA || tokenAddr == self.jettonAddressB, "unknown jetton addr");
-        // check if jetton a or b
-        let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
         if (msg.from == self.owner) {
-            self.addBalance(pr.left.addr, msg.amount);
-            send(SendParameters{to: sender(),
+            self.addBalance(tokenAddr, msg.amount);
+            send(SendParameters{to: tokenAddr,
                     value: 0,
                     mode: SendRemainingValue,
                     bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: 0,
-                        destination: self.owner,
+                        destination: msg.from,
                         responseDestination: msg.from,
                         customPayload: null,
                         forwardTonAmount: 0,
@@ -66,8 +64,8 @@ contract Task3 with Deployable {
             );
         } else {
             // check if incoming < jetton available
-            if (pr.left.amt < msg.amount || pr.right.amt == 0) {
-                send(SendParameters{to: sender(),
+            if (self.balance(tokenAddr) < msg.amount || self.aAmount == 0 || self.bAmount == 0) {
+                send(SendParameters{to: tokenAddr,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
@@ -82,6 +80,7 @@ contract Task3 with Deployable {
                     }
                 );
             } else {
+                let pr: Pair = self.getPair(tokenAddr);
                 // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
                 // A-B (amtB * decimal / amtA) * tokenA / decimal
                 // 2A+1A->3B => 1x1 price, return 1B
@@ -159,10 +158,10 @@ contract Task3 with Deployable {
     }
     
     get fun price(jetton: Address): Int {
-        let pr: Pair = self.getPair(jetton);
-        if (pr.left.amt == 0 || pr.right.amt == 0) {
-            return 0;
+        if (jetton == self.jettonAddressA) {
+            return self.bAmount * self.decimal / self.aAmount;
+        } else {
+            return self.aAmount * self.decimal / self.bAmount;
         }
-        return pr.right.amt * self.decimal / pr.left.amt;
     }
 }
