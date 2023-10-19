@@ -47,56 +47,40 @@ contract Task3 with Deployable {
         // top up for admins
         if (msg.from == self.owner) {
             self.addBalance(leftAddr, msg.amount);
-            send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: true,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: 0,
-                        destination: msg.from,
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                }
-            );
+            self.sendBack(msg.from, 0, msg);
         } else {
             if (msg.amount > self.balance(leftAddr)) {
-                send(SendParameters{to: sender(),
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: msg.amount,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
+                self.sendBack(sender(), msg.amount, msg);
             } else {
                 let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
-                self.addBalance(leftAddr, msg.amount);
-                self.subtractBalance(rightAddr, swapped);
-                send(SendParameters{to: rightAddr,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: swapped,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
+                // by any chance  is still zero
+                if (swapped == 0) {
+                    self.sendBack(sender(), msg.amount, msg);
+                } else {
+                    // send swapped to second address
+                    self.addBalance(leftAddr, msg.amount);
+                    self.subtractBalance(rightAddr, swapped);
+                    self.sendBack(rightAddr, swapped, msg);
+                }
             }
         }
+    }
+
+     fun sendBack(tokenAddr: Address, amount: Int, msg: TokenNotification) {
+        send(SendParameters{to: tokenAddr,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: true,
+                body: TokenTransfer{queryId: msg.queryId,
+                    amount: amount,
+                    destination: msg.from,
+                    responseDestination: myAddress(),
+                    customPayload: null,
+                    forwardTonAmount: ton("0.01"),
+                    forwardPayload: emptySlice()
+                }.toCell()
+            }
+        );
     }
 
      fun addBalance(jetton: Address, amt: Int) {
