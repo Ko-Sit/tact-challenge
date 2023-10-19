@@ -36,6 +36,10 @@ contract Task3 with Deployable {
         let leftAddr: Address = sender();
         require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
         let rightAddr: Address = self.jettonAddressA;
+        if (leftAddr == self.jettonAddressA) {
+            rightAddr = self.jettonAddressB;
+        }
+         // top up for admins
         if (sender() == self.owner) {
             self.addBalance(leftAddr, msg.amount);
             send(SendParameters{to: sender(),
@@ -53,9 +57,9 @@ contract Task3 with Deployable {
                 }
             );
         } else {
-            // top up for admins
+            let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
             // check if incoming < jetton available
-            if (self.price(leftAddr) * msg.amount > self.balance(rightAddr)) {
+            if (swapped > self.balance(rightAddr)) {
                 send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
@@ -71,11 +75,6 @@ contract Task3 with Deployable {
                     }
                 );
             } else {
-                
-                if (leftAddr == self.jettonAddressA) {
-                    rightAddr = self.jettonAddressB;
-                }
-                let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
                 self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: rightAddr,
