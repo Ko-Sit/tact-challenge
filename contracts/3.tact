@@ -34,17 +34,30 @@ contract Task3 with Deployable {
 
     receive(msg: TokenNotification){
         let leftAddr: Address = sender();
-        if(leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
+        if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
             throw(100);
         }
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
         }
-         // top up for admins
+        // top up for admins
         if (msg.from == self.owner) {
             self.addBalance(leftAddr, msg.amount);
-            self.reply("adminps".asComment());
+            send(SendParameters{to: sender(),
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: 0,
+                        destination: msg.from,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         } else {
             if (msg.amount > self.balance(leftAddr)) {
                 send(SendParameters{to: sender(),
