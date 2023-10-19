@@ -28,8 +28,8 @@ struct Pool {
 
 contract Task3 with Deployable {
     owner: Address;
-    aAmount: Int;
-    bAmount: Int;
+    aAmount: Int as coins;
+    bAmount: Int as coins;
     jettonAddressA: Address;
     jettonAddressB: Address;
     decimal: Int;
@@ -88,7 +88,7 @@ contract Task3 with Deployable {
                 if (leftAddr == self.jettonAddressA) {
                     rightAddr = self.jettonAddressB;
                 }
-                let swapped: Int = self.price(leftAddr) * msg.amount;
+                let swapped: Int = (self.balance(rightAddr) * self.decimal / self.balance(leftAddr)) * msg.amount / self.decimal;
                 self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: sender(),
