@@ -43,72 +43,58 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        // let tokenAddr: Address = sender();
-        //  require(tokenAddr == self.jettonAddressA || tokenAddr == self.jettonAddressB, "unknown jetton addr");
-        // // check if jetton a or b
-        // let pr: Pair = self.getPair(tokenAddr);
-        // // top up for admins
-        // if (msg.from == self.owner) {
-        //     if (tokenAddr == self.jettonAddressA) {
-        //         self.aAmount = pr.left.amt + msg.amount;
-        //     } else {
-        //         self.bAmount = pr.left.amt + msg.amount;
-        //     }
-        //     send(SendParameters{to: sender(),
-        //             value: 0,
-        //             mode: SendRemainingValue,
-        //             bounce: true,
-        //             body: TokenTransfer{queryId: msg.queryId,
-        //                 amount: msg.amount,
-        //                 destination: msg.from,
-        //                 responseDestination: msg.from,
-        //                 customPayload: null,
-        //                 forwardTonAmount: 0,
-        //                 forwardPayload: emptySlice()
-        //             }.toCell()
-        //         }
-        //     );
-        // } else {
-        //     // check if incoming < jetton available
-        //     if (pr.left.amt < msg.amount) {
-        //         send(SendParameters{to: sender(),
-        //                 value: 0,
-        //                 mode: SendRemainingValue,
-        //                 bounce: true,
-        //                 body: TokenTransfer{queryId: msg.queryId,
-        //                     amount: msg.amount,
-        //                     destination: msg.from,
-        //                     responseDestination: msg.from,
-        //                     customPayload: null,
-        //                     forwardTonAmount: 0,
-        //                     forwardPayload: emptySlice()
-        //                 }.toCell()
-        //             }
-        //         );
-        //     } else {
-        //         // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
-        //         // A-B (amtB * decimal / amtA) * tokenA / decimal
-        //         // 2A+1A->3B => 1x1 price, return 1B
-        //         self.addBalance(pr.left.addr, msg.amount);
-        //         pr.left.amt = pr.left.amt + msg.amount;
-        //         let swapped: Int = (pr.right.amt * self.decimal) / (pr.left.amt * msg.amount) / self.decimal;
-        //         self.subtractBalance(pr.right.addr, swapped);
-        //         send(SendParameters{to: sender(),
-        //                 value: 0,
-        //                 mode: SendRemainingValue,
-        //                 bounce: true,
-        //                 body: TokenTransfer{queryId: msg.queryId,
-        //                     amount: swapped,
-        //                     destination: msg.from,
-        //                     responseDestination: msg.from,
-        //                     customPayload: null,
-        //                     forwardTonAmount: 0,
-        //                     forwardPayload: emptySlice()
-        //                 }.toCell()
-        //             }
-        //         );
-        //     }
-        // }
+        let tokenAddr: Address = sender();
+        require(tokenAddr == self.jettonAddressA || tokenAddr == self.jettonAddressB, "unknown jetton addr");
+        // check if jetton a or b
+        let pr: Pair = self.getPair(tokenAddr);
+        // top up for admins
+        if (msg.from == self.owner) {
+            if (tokenAddr == self.jettonAddressA) {
+                self.addBalance(pr.left.addr, msg.amount);
+            } else {
+                self.addBalance(pr.right.addr, msg.amount);
+            }
+        } else {
+            // check if incoming < jetton available
+            if (pr.left.amt < msg.amount) {
+                send(SendParameters{to: sender(),
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: msg.amount,
+                            destination: msg.from,
+                            responseDestination: msg.from,
+                            customPayload: null,
+                            forwardTonAmount: 0,
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
+            } else {
+                // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
+                // A-B (amtB * decimal / amtA) * tokenA / decimal
+                // 2A+1A->3B => 1x1 price, return 1B
+                self.addBalance(pr.left.addr, msg.amount);
+                pr.left.amt = pr.left.amt + msg.amount;
+                let swapped: Int = (pr.right.amt * self.decimal) / (pr.left.amt * msg.amount) / self.decimal;
+                self.subtractBalance(pr.right.addr, swapped);
+                send(SendParameters{to: sender(),
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: swapped,
+                            destination: msg.from,
+                            responseDestination: msg.from,
+                            customPayload: null,
+                            forwardTonAmount: 0,
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
+            }
+        }
     }
 
      fun getPair(from: Address): Pair {
