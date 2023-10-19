@@ -35,12 +35,6 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
-        // Gas checks
-        let ctx: Context = context();
-        let fwdFee: Int = ctx.readForwardFee() + ctx.readForwardFee();
-        let final: Int = 2 * self.gasConsumption + self.minTonsForStorage + fwdFee;
-        require(ctx.value > min(final, ton("0.01")), "Invalid value!!");
-        // lupa checks
         let leftAddr: Address = sender();
         if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
             throw(100);
@@ -82,7 +76,7 @@ contract Task3 with Deployable {
                         }.toCell()
                     }
                 );
-            } else if (msg.amount > 0) {
+            } else if (msg.amount == 0) {
                 send(SendParameters{to: rightAddr,
                         value: 0,
                         mode: SendRemainingValue,
