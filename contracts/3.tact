@@ -53,7 +53,6 @@ contract Task3 with Deployable {
                 }
             );
         } else {
-            require(self.aAmount > 0 && self.bAmount > 0, "zero amount");
             // check if incoming < jetton available
             if (self.balance(leftAddr) < msg.amount) {
                 send(SendParameters{to: sender(),
@@ -75,7 +74,7 @@ contract Task3 with Deployable {
                 if (leftAddr == self.jettonAddressA) {
                     rightAddr = self.jettonAddressB;
                 }
-                let swapped: Int = self.balance(rightAddr) * msg.amount * self.decimal / self.balance(leftAddr) / self.decimal;
+                let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
                 self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: sender(),
