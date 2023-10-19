@@ -15,15 +15,6 @@ message(0xf8a7ea5) TokenTransfer {
     forwardTonAmount: Int as coins; // should be ton("0.01")
     forwardPayload: Slice as remaining; // should be emptySlice()
 }
-struct Pair {
-    left: Pool;
-    right: Pool;
-}
-// todo move pool to contract
-struct Pool {
-    amt: Int;
-    addr: Address;
-}
 
 contract Task3 with Deployable {
     owner: Address;
@@ -50,7 +41,7 @@ contract Task3 with Deployable {
             send(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
-                    bounce: true,
+                    bounce: false,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: 0,
                         destination: msg.from,
@@ -66,14 +57,14 @@ contract Task3 with Deployable {
             if (self.balance(leftAddr) < msg.amount || self.aAmount == 0 || self.bAmount == 0) {
                 send(SendParameters{to: sender(),
                         value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
+                        mode: SendIgnoreErrors,
+                        bounce: false,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
+                            forwardTonAmount: 0,
                             forwardPayload: emptySlice()
                         }.toCell()
                     }
@@ -88,7 +79,7 @@ contract Task3 with Deployable {
                 self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: sender(),
                         value: 0,
-                        mode: SendRemainingValue,
+                        mode: SendPayGasSeparately + SendIgnoreErrors,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
