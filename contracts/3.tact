@@ -125,9 +125,9 @@ contract Task3 with Deployable {
             return 0;
         }
         if (jetton == self.jettonAddressA) {
-            return self.bAmount * self.decimal / self.aAmount / self.decimal;
+            return self.bAmount * self.decimal / self.aAmount;
         } else {
-            return self.aAmount * self.decimal / self.bAmount / self.decimal;
+            return self.aAmount * self.decimal / self.bAmount;
         }
     }
 }
