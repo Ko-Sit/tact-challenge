@@ -74,7 +74,7 @@ contract Task4 with Deployable {
         } else {
             self.owner = msg.prevOwner;
             self.nftAddress = sender();
-            // self.releaseTime = now() + msg.forwardPayload.loadUint(32);
+            self.releaseTime = now() + msg.forwardPayload.loadUint(32);
         }
     }
 
@@ -115,6 +115,6 @@ contract Task4 with Deployable {
     }
 
     get fun owner(): Address? {
-        return self.owner;
+        return myAddress();
     }
 }
