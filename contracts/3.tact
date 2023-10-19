@@ -20,46 +20,39 @@ contract Task3 with Deployable {
     owner: Address;
     aAmount: Int;
     bAmount: Int;
-    jettonAddressA: Address;
-    jettonAddressB: Address;
-    decimal: Int;
-    init(admin: Address, newJettonAddressA: Address, newJettonAddressB: Address){
+    jA: Address;
+    jB: Address;
+    init(admin: Address, newjA: Address, newjB: Address){
         self.owner = admin;
-        self.jettonAddressA = newJettonAddressA;
-        self.jettonAddressB = newJettonAddressB;
+        self.jA = newjA;
+        self.jB = newjB;
         self.aAmount = 0;
         self.bAmount = 0;
-        self.decimal = 1000000000;
     }
 
     receive(msg: TokenNotification){
-        require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "suct");
+        require(sender() == self.jA || sender() == self.jB, "s");
         let leftAddr: Address = sender();
-        let rightAddr: Address = self.jettonAddressA;
-        let isLeft: Bool = leftAddr == self.jettonAddressA;
+        let rightAddr: Address = self.jA;
+        let isLeft: Bool = leftAddr == self.jA;
         if (isLeft) {
-            rightAddr = self.jettonAddressB;
+            rightAddr = self.jB;
         }
         // top up for admins
         if (msg.from != self.owner) {
             if (msg.amount <= self.balance(leftAddr)) {
-                let swapped: Int = self.price(leftAddr) * msg.amount / self.decimal;
+                let swapped: Int = self.price(leftAddr) * msg.amount / 1000000000;
                 // send swapped to second address
                 if (isLeft) {
                     self.aAmount = self.aAmount + msg.amount;
-                } else {
-                    self.bAmount = self.bAmount + msg.amount;
-                }
-                // subtract
-                if (isLeft) {
                     self.bAmount = self.bAmount - swapped;
                 } else {
+                    self.bAmount = self.bAmount + msg.amount;
                     self.aAmount = self.aAmount - swapped;
                 }
                 send(SendParameters{to: rightAddr,
                         value: 0,
                         mode: SendRemainingValue,
-                        bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
                             destination: msg.from,
@@ -74,7 +67,6 @@ contract Task3 with Deployable {
                 send(SendParameters{to: leftAddr,
                         value: 0,
                         mode: SendRemainingValue,
-                        bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: msg.from,
@@ -95,7 +87,6 @@ contract Task3 with Deployable {
             send(SendParameters{to: leftAddr,
                     value: 0,
                     mode: SendRemainingValue,
-                    bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: 0,
                         destination: msg.from,
@@ -109,19 +100,17 @@ contract Task3 with Deployable {
         }
     }
 
-     fun sendBack(tokenAddr: Address, amount: Int, msg: TokenNotification) {}
-
     get fun balance(jetton: Address): Int {
-        if (jetton == self.jettonAddressA) {
+        if (jetton == self.jA) {
             return self.aAmount;
         }
         return self.bAmount;
     }
 
     get fun price(jetton: Address): Int {
-        if (jetton == self.jettonAddressA) {
-            return self.bAmount * self.decimal / self.aAmount;
+        if (jetton == self.jA) {
+            return self.bAmount * 1000000000 / self.aAmount;
         }
-        return self.aAmount * self.decimal / self.bAmount;
+        return self.aAmount * 1000000000 / self.bAmount;
     }
 }
