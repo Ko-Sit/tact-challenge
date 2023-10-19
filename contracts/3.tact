@@ -17,8 +17,6 @@ message(0xf8a7ea5) TokenTransfer {
 }
 
 contract Task3 with Deployable {
-    const minTonsForStorage: Int = ton("0.01");
-    const gasConsumption: Int = ton("0.01");
     owner: Address;
     aAmount: Int;
     bAmount: Int;
@@ -35,8 +33,8 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
+        require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "suct");
         let leftAddr: Address = sender();
-        require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "suct");
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
@@ -94,21 +92,14 @@ contract Task3 with Deployable {
     get fun balance(jetton: Address): Int {
         if (jetton == self.jettonAddressA) {
             return self.aAmount;
-        } else if (jetton == self.jettonAddressB) {
-            return self.bAmount;
-        }
-        return 0;
+        } 
+        return self.bAmount;
     }
 
     get fun price(jetton: Address): Int {
-        if (self.aAmount == 0 || self.bAmount == 0) {
-            return 0;
-        }
         if (jetton == self.jettonAddressA) {
             return self.bAmount * self.decimal / self.aAmount;
-        } else if (jetton == self.jettonAddressB) {
-            return self.aAmount * self.decimal / self.bAmount;
-        }
-        return 0;
+        } 
+        return self.aAmount * self.decimal / self.bAmount;
     }
 }
