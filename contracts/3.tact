@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 message(0x7362d09c) TokenNotification {
     queryId: Int as uint64;
     amount: Int as coins;
@@ -28,8 +27,8 @@ struct Pool {
 
 contract Task3 with Deployable {
     owner: Address;
-    aAmount: Int as coins;
-    bAmount: Int as coins;
+    aAmount: Int;
+    bAmount: Int;
     jettonAddressA: Address;
     jettonAddressB: Address;
     decimal: Int;
@@ -64,48 +63,27 @@ contract Task3 with Deployable {
             );
         } else {
             // check if incoming < jetton available
-            if (self.balance(leftAddr) < msg.amount || self.aAmount == 0 || self.bAmount == 0) {
-                send(SendParameters{to: sender(),
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: msg.amount,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: 0,
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
-            } else {
-                // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
-                // A-B (amtB * decimal / amtA) * tokenA / decimal
-                // 2A+1A->3B => 1x1 price, return 1B
-                // TODO top up balance before swap
-                let rightAddr : Address = self.jettonAddressA;
-                if (leftAddr == self.jettonAddressA) {
-                    rightAddr = self.jettonAddressB;
-                }
-                let swapped: Int = (self.balance(rightAddr) * self.decimal / self.balance(leftAddr)) * msg.amount / self.decimal;
-                self.addBalance(leftAddr, msg.amount);
-                self.subtractBalance(rightAddr, swapped);
-                send(SendParameters{to: sender(),
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: swapped,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: 0,
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
+            let rightAddr: Address = self.jettonAddressA;
+            if (leftAddr == self.jettonAddressA) {
+                rightAddr = self.jettonAddressB;
             }
+            let swapped: Int = (self.balance(rightAddr) * msg.amount * self.decimal) / (self.balance(leftAddr) * self.decimal);
+            self.addBalance(leftAddr, msg.amount);
+            self.subtractBalance(rightAddr, swapped);
+            send(SendParameters{to: sender(),
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: swapped,
+                        destination: msg.from,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: 0,
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         }
     }
 
@@ -132,15 +110,15 @@ contract Task3 with Deployable {
             return self.bAmount;
         }
     }
-    
+
     get fun price(jetton: Address): Int {
         if (self.aAmount == 0 || self.bAmount == 0) {
             return 0;
         }
         if (jetton == self.jettonAddressA) {
-            return self.aAmount * self.decimal / self.bAmount;
-        } else {
             return self.bAmount * self.decimal / self.aAmount;
+        } else {
+            return self.aAmount * self.decimal / self.bAmount;
         }
     }
 }
