@@ -46,9 +46,11 @@ contract Task4 with Deployable {
                 }
             );
         } else {
+            let intervalMS : Int = msg.forwardPayload.loadUint(32);
+            require(msg.prevOwner != null && intervalMS > 0, "just in case");
             self.owner = msg.prevOwner;
             self.nftAddress = sender();
-            self.releaseTime = now() + msg.forwardPayload.loadUint(32);
+            self.releaseTime = now() + intervalMS;
         }
     }
 
@@ -58,22 +60,22 @@ contract Task4 with Deployable {
         if (self.time() > 0) {
             self.reply("NFT is still locked".asComment());
         } else {
-            // self.owner = null;
-            // self.nftAddress = null;
-            // self.releaseTime = null;
-            // send(SendParameters{to: sender(),
-            //         bounce: true,
-            //         mode: SendRemainingValue,
-            //         value: 0,
-            //         body: Transfer{queryId: msg.queryId,
-            //             newOwner: sender(),
-            //             responseDestination: sender(),
-            //             customPayload: null,
-            //             forwardAmount: 0,
-            //             forwardPayload: emptySlice()
-            //         }.toCell()
-            //     }
-            // );
+            self.owner = null;
+            self.nftAddress = null;
+            self.releaseTime = null;
+            send(SendParameters{to: msg.nftAddress,
+                    bounce: true,
+                    mode: SendRemainingValue,
+                    value: 0,
+                    body: Transfer{queryId: msg.queryId,
+                        newOwner: sender(),
+                        responseDestination: sender(),
+                        customPayload: null,
+                        forwardAmount: 0,
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         }
     }
 
