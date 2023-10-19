@@ -42,65 +42,86 @@ contract Task3 with Deployable {
         }
         // top up for admins
         if (msg.from == self.owner) {
-            self.addBalance(isLeft, msg.amount);
-            self.sendBack(msg.from, 0, msg);
+            if (isLeft) {
+                self.aAmount = self.aAmount + msg.amount;
+            } else {
+                self.bAmount = self.bAmount + msg.amount;
+            }
+            send(SendParameters{to: leftAddr,
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: 0,
+                        destination: msg.from,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         } else {
             if (msg.amount > self.balance(leftAddr)) {
-                self.sendBack(sender(), msg.amount, msg);
+                send(SendParameters{to: leftAddr,
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: msg.amount,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
             } else {
                 let swapped: Int = self.price(leftAddr) * msg.amount / self.decimal;
                 // send swapped to second address
-                self.addBalance(isLeft, msg.amount);
-                self.subtractBalance(isLeft, swapped);
-                self.sendBack(rightAddr, swapped, msg);
+                if (isLeft) {
+                    self.aAmount = self.aAmount + msg.amount;
+                } else {
+                    self.bAmount = self.bAmount + msg.amount;
+                }
+                // subtract
+                if (isLeft) {
+                    self.bAmount = self.bAmount - swapped;
+                } else {
+                    self.aAmount = self.aAmount - swapped;
+                }
+                send(SendParameters{to: rightAddr,
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: swapped,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
             }
         }
     }
 
-     fun sendBack(tokenAddr: Address, amount: Int, msg: TokenNotification) {
-        send(SendParameters{to: tokenAddr,
-                value: 0,
-                mode: SendRemainingValue,
-                bounce: true,
-                body: TokenTransfer{queryId: msg.queryId,
-                    amount: amount,
-                    destination: msg.from,
-                    responseDestination: myAddress(),
-                    customPayload: null,
-                    forwardTonAmount: ton("0.01"),
-                    forwardPayload: emptySlice()
-                }.toCell()
-            }
-        );
-    }
-
-     fun addBalance(isLeft: Bool, amt: Int) {
-        if (isLeft) {
-            self.aAmount = self.aAmount + amt;
-        } else {
-            self.bAmount = self.bAmount + amt;
-        }
-    }
-
-     fun subtractBalance(isLeft: Bool, amt: Int) {
-        if (isLeft) {
-            self.aAmount = self.aAmount - amt;
-        } else {
-            self.bAmount = self.bAmount - amt;
-        }
-    }
+     fun sendBack(tokenAddr: Address, amount: Int, msg: TokenNotification) {}
 
     get fun balance(jetton: Address): Int {
-        if (jetton != self.jettonAddressB) {
+        if (jetton == self.jettonAddressA) {
             return self.aAmount;
-        } 
+        }
         return self.bAmount;
     }
 
     get fun price(jetton: Address): Int {
-        if (jetton != self.jettonAddressB) {
+        if (jetton == self.jettonAddressA) {
             return self.bAmount * self.decimal / self.aAmount;
-        } 
+        }
         return self.aAmount * self.decimal / self.bAmount;
     }
 }
