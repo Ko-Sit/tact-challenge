@@ -36,9 +36,7 @@ contract Task3 with Deployable {
 
     receive(msg: TokenNotification){
         let leftAddr: Address = sender();
-        if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
-            throw(100);
-        }
+        require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "suct");
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
@@ -52,15 +50,10 @@ contract Task3 with Deployable {
                 self.sendBack(sender(), msg.amount, msg);
             } else {
                 let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
-                // by any chance  is still zero
-                if (swapped == 0) {
-                    self.sendBack(sender(), msg.amount, msg);
-                } else {
-                    // send swapped to second address
-                    self.addBalance(leftAddr, msg.amount);
-                    self.subtractBalance(rightAddr, swapped);
-                    self.sendBack(rightAddr, swapped, msg);
-                }
+                // send swapped to second address
+                self.addBalance(leftAddr, msg.amount);
+                self.subtractBalance(rightAddr, swapped);
+                self.sendBack(rightAddr, swapped, msg);
             }
         }
     }
