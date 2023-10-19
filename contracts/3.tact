@@ -39,6 +39,7 @@ contract Task3 with Deployable {
         if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
             throw(100);
         }
+        require(msg.amount > 0, "rapp");
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
@@ -68,21 +69,6 @@ contract Task3 with Deployable {
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
-            } else if (msg.amount == 0) {
-                send(SendParameters{to: rightAddr,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: 0,
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
