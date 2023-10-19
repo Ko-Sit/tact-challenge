@@ -37,6 +37,20 @@ contract Task3 with Deployable {
         require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
         if (sender() == self.owner) {
             self.addBalance(leftAddr, msg.amount);
+            send(SendParameters{to: sender(),
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: 0,
+                        destination: msg.from,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
             return;
         }
         // top up for admins
