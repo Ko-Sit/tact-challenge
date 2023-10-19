@@ -35,15 +35,20 @@ contract Task3 with Deployable {
     receive(msg: TokenNotification){
         let leftAddr: Address = sender();
         require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
-        // top up for admins
-        if (msg.from == self.owner) {
+        if (sender() == self.owner) {
             self.addBalance(leftAddr, msg.amount);
+            send(SendParameters{to: sender(), value: 0, mode: SendRemainingValue, bounce: true, body: emptyCell()});
+            return ;
+        }
+        // top up for admins
+        // check if incoming < jetton available
+        if (self.balance(leftAddr) < msg.amount) {
             send(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
                     bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
-                        amount: 0,
+                        amount: msg.amount,
                         destination: msg.from,
                         responseDestination: myAddress(),
                         customPayload: null,
@@ -52,47 +57,29 @@ contract Task3 with Deployable {
                     }.toCell()
                 }
             );
-        } else {
-            // check if incoming < jetton available
-            if (self.balance(leftAddr) < msg.amount) {
-                send(SendParameters{to: sender(),
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: msg.amount,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
-            } else {
-                let rightAddr: Address = self.jettonAddressA;
-                if (leftAddr == self.jettonAddressA) {
-                    rightAddr = self.jettonAddressB;
-                }
-                let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
-                self.addBalance(leftAddr, msg.amount);
-                self.subtractBalance(rightAddr, swapped);
-                send(SendParameters{to: rightAddr,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: swapped,
-                            destination: self.owner,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: 0,
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
-            }
+            return ;
         }
+        let rightAddr: Address = self.jettonAddressA;
+        if (leftAddr == self.jettonAddressA) {
+            rightAddr = self.jettonAddressB;
+        }
+        let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
+        self.addBalance(leftAddr, msg.amount);
+        self.subtractBalance(rightAddr, swapped);
+        send(SendParameters{to: rightAddr,
+                value: 0,
+                mode: SendRemainingValue,
+                bounce: true,
+                body: TokenTransfer{queryId: msg.queryId,
+                    amount: swapped,
+                    destination: self.owner,
+                    responseDestination: myAddress(),
+                    customPayload: null,
+                    forwardTonAmount: 0,
+                    forwardPayload: emptySlice()
+                }.toCell()
+            }
+        );
     }
 
      fun addBalance(jetton: Address, amt: Int) {
