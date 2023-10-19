@@ -60,11 +60,11 @@ contract Task3 with Deployable {
                     bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: msg.amount,
-                        destination: sender(),
-                        responseDestination: myAddress(),
+                        destination: msg.from,
+                        responseDestination: msg.from,
                         customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: msg.forwardPayload
+                        forwardTonAmount: 0,
+                        forwardPayload: emptySlice()
                     }.toCell()
                 }
             );
@@ -78,10 +78,10 @@ contract Task3 with Deployable {
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: msg.from,
-                            responseDestination: myAddress(),
+                            responseDestination: msg.from,
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: msg.forwardPayload
+                            forwardTonAmount: 0,
+                            forwardPayload: emptySlice()
                         }.toCell()
                     }
                 );
@@ -90,7 +90,8 @@ contract Task3 with Deployable {
                 // A-B (amtB * decimal / amtA) * tokenA / decimal
                 // 2A+1A->3B => 1x1 price, return 1B
                 self.addBalance(pr.left.addr, msg.amount);
-                let swapped: Int = pr.right.amt * self.decimal / pr.left.amt * msg.amount / self.decimal;
+                pr.left.amt = pr.left.amt + msg.amount;
+                let swapped: Int = (pr.right.amt * self.decimal) / (pr.left.amt * msg.amount) / self.decimal;
                 self.subtractBalance(pr.right.addr, swapped);
                 send(SendParameters{to: sender(),
                         value: 0,
@@ -99,10 +100,10 @@ contract Task3 with Deployable {
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
                             destination: msg.from,
-                            responseDestination: myAddress(),
+                            responseDestination: msg.from,
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: msg.forwardPayload
+                            forwardTonAmount: 0,
+                            forwardPayload: emptySlice()
                         }.toCell()
                     }
                 );
@@ -162,7 +163,7 @@ contract Task3 with Deployable {
     get fun price(jetton: Address): Int {
         let pr: Pair = self.getPair(jetton);
         if (pr.left.amt == 0 || pr.right.amt == 0) {
-            return 0;
+            return -1;
         }
         return pr.right.amt * self.decimal / pr.left.amt;
     }
