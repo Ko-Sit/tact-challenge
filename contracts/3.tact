@@ -44,20 +44,7 @@ contract Task3 with Deployable {
          // top up for admins
         if (msg.from == self.owner) {
             self.addBalance(leftAddr, msg.amount);
-            send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: true,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: 0,
-                        destination: msg.from,
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                }
-            );
+            self.reply("adminps".asComment());
         } else {
             if (msg.amount > self.balance(leftAddr)) {
                 send(SendParameters{to: sender(),
