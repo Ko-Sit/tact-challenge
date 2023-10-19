@@ -71,7 +71,7 @@ contract Task3 with Deployable {
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
-                            destination: self.owner,
+                            destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
