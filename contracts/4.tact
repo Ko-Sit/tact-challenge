@@ -1,5 +1,4 @@
 import "@stdlib/deploy";
-
 message(0x05138d91) OwnershipAssigned {
     queryId: Int as uint64;
     prevOwner: Address;
@@ -17,21 +16,22 @@ message NftWithdrawal {
     queryId: Int as uint64;
     nftAddress: Address;
 }
-
-contract Task4 with Deployable {
-    seed: Int as uint128;
+struct Vault {
     nftAddress: Address?;
     releaseTime: Int?;
     owner: Address?;
+}
+
+contract Task4 with Deployable {
+    seed: Int as uint128;
+    vault: Vault;
     init(seed: Int){
         self.seed = seed;
-        self.nftAddress = null;
-        self.releaseTime = null;
-        self.owner = null;
+        self.vault = Vault{nftAddress: null, releaseTime: null, owner: null};
     }
 
     receive(msg: OwnershipAssigned){
-        if (self.owner != null) {
+        if (self.owner() != null) {
             send(SendParameters{to: sender(),
                     bounce: true,
                     value: 0,
@@ -46,20 +46,19 @@ contract Task4 with Deployable {
                 }
             );
         } else {
-            self.owner = msg.prevOwner;
-            self.nftAddress = sender();
-            self.releaseTime = now() + msg.forwardPayload.loadUint(32);
+            self.vault = Vault{owner: msg.prevOwner,
+                nftAddress: sender(),
+                releaseTime: now() + msg.forwardPayload.loadUint(32)
+            };
         }
     }
 
     receive(msg: NftWithdrawal){
         require(sender() == self.owner(), "Invalid sender");
-        if (self.releaseTime!! > now()) {
+        if (self.time() > now()) {
             self.reply("NFT is still locked".asComment());
         } else {
-            self.owner = null;
-            self.releaseTime = null;
-            self.nftAddress = null;
+            self.vault = Vault{nftAddress: null, releaseTime: null, owner: null};
             send(SendParameters{to: msg.nftAddress,
                     bounce: true,
                     mode: SendRemainingValue,
@@ -77,17 +76,17 @@ contract Task4 with Deployable {
     }
 
     get fun time(): Int {
-        if (self.releaseTime != null) {
-            return self.releaseTime!! - now();
+        if (self.vault.releaseTime != null) {
+            return self.vault.releaseTime!! - now();
         }
         return 0;
     }
 
     get fun nft(): Address? {
-        return self.nftAddress;
+        return self.vault.nftAddress;
     }
 
     get fun owner(): Address? {
-        return self.owner;
+        return self.vault.owner;
     }
 }
