@@ -54,6 +54,20 @@ contract Task3 with Deployable {
             } else {
                 self.addBalance(pr.right.addr, msg.amount);
             }
+            send(SendParameters{to: sender(),
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: msg.amount,
+                        destination: msg.from,
+                        responseDestination: msg.from,
+                        customPayload: null,
+                        forwardTonAmount: 0,
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
