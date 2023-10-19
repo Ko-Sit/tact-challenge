@@ -24,7 +24,7 @@ contract Task4 with Deployable {
     releaseTime: Int?;
     owner: Address?;
     init(seed: Int){
-        self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
+        self.seed = seed;
         self.nftAddress = null;
         self.releaseTime = null;
         self.owner = null;
@@ -63,7 +63,7 @@ contract Task4 with Deployable {
             self.releaseTime = null;
             send(SendParameters{to: sender(),
                     bounce: true,
-                    mode: SendRemainingValue,
+                    mode: SendRemainingBalance,
                     value: 0,
                     body: Transfer{queryId: msg.queryId,
                         newOwner: owner,
