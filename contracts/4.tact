@@ -64,7 +64,7 @@ contract Task4 with Deployable {
                     mode: SendRemainingValue,
                     body: Transfer{queryId: msg.queryId,
                         newOwner: sender(),
-                        responseDestination: sender(),
+                        responseDestination: msg.prevOwner,
                         customPayload: null,
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
@@ -87,12 +87,12 @@ contract Task4 with Deployable {
             self.owner = null;
             self.nftAddress = null;
             self.releaseTime = null;
-            send(SendParameters{to: msg.nftAddress,
+            send(SendParameters{to: sender(),
                     bounce: true,
                     mode: SendRemainingValue,
                     value: 0,
                     body: Transfer{queryId: msg.queryId,
-                        newOwner: owner,
+                        newOwner: sender(),
                         responseDestination: owner,
                         customPayload: null,
                         forwardAmount: 0,

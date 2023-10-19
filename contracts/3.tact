@@ -75,7 +75,7 @@ contract Task3 with Deployable {
 
     receive(msg: TokenNotification){
         let tokenAddr: Address = sender();
-        self.validateJetton(tokenAddr);
+         require(tokenAddr == self.jettonAddressA || tokenAddr == self.jettonAddressB, "unknown jetton addr");
         // check if jetton a or b
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
@@ -91,8 +91,8 @@ contract Task3 with Deployable {
                     bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: msg.amount,
-                        destination: msg.from,
-                        responseDestination: msg.from,
+                        destination: sender(),
+                        responseDestination: myAddress(),
                         customPayload: null,
                         forwardTonAmount: ton("0.01"),
                         forwardPayload: msg.forwardPayload
@@ -102,14 +102,14 @@ contract Task3 with Deployable {
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
-                send(SendParameters{to: msg.from,
+                send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: msg.from,
-                            responseDestination: msg.from,
+                            responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
                             forwardPayload: msg.forwardPayload
@@ -130,7 +130,7 @@ contract Task3 with Deployable {
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
                             destination: msg.from,
-                            responseDestination: msg.from,
+                            responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: ton("0.01"),
                             forwardPayload: msg.forwardPayload
@@ -183,10 +183,6 @@ contract Task3 with Deployable {
             self.bAmount = self.bAmount - amt;
         }
     }
-
-    fun validateJetton(jetton: Address) {
-        require(jetton == self.jettonAddressA || jetton == self.jettonAddressB, "unknown jetton addr");
-    } 
 
     get fun balance(jetton: Address): Int {
         let amt: Int = self.getPool(jetton).amt;
