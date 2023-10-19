@@ -88,8 +88,8 @@ contract Task3 with Deployable {
                 if (leftAddr == self.jettonAddressA) {
                     rightAddr = self.jettonAddressB;
                 }
-                self.addBalance(leftAddr, msg.amount);
                 let swapped: Int = (self.balance(rightAddr) * self.decimal / self.balance(leftAddr)) * msg.amount / self.decimal;
+                self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: sender(),
                         value: 0,
