@@ -32,16 +32,15 @@ contract Task3 with Deployable {
 
     receive(msg: TokenNotification){
         require(sender() == self.jA || sender() == self.jB, "s");
-        let leftAddr: Address = sender();
         let rightAddr: Address = self.jA;
-        let isLeft: Bool = leftAddr == self.jA;
+        let isLeft: Bool = sender() == self.jA;
         if (isLeft) {
             rightAddr = self.jB;
         }
         // top up for admins
         if (msg.from != self.owner) {
-            if (msg.amount <= self.balance(leftAddr)) {
-                let swapped: Int = self.price(leftAddr) * msg.amount / 1000000000;
+            if (msg.amount <= self.balance(sender())) {
+                let swapped: Int = self.price(sender()) * msg.amount / 1000000000;
                 // send swapped to second address
                 if (isLeft) {
                     self.aAmount = self.aAmount + msg.amount;
@@ -64,7 +63,7 @@ contract Task3 with Deployable {
                     }
                 );
             } else {
-                send(SendParameters{to: leftAddr,
+                send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
                         body: TokenTransfer{queryId: msg.queryId,
@@ -84,7 +83,7 @@ contract Task3 with Deployable {
             } else {
                 self.bAmount = self.bAmount + msg.amount;
             }
-            send(SendParameters{to: leftAddr,
+            send(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
                     body: TokenTransfer{queryId: msg.queryId,
