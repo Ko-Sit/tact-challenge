@@ -139,7 +139,7 @@ contract Task3 with Deployable {
                 // send swapped to second address
                 self.bAmount = self.bAmount + msg.amount;
                 // subtract
-                self.bAmount = self.bAmount - swapped;
+                self.aAmount = self.aAmount - swapped;
                 send(SendParameters{to: self.jettonAddressA,
                         value: 0,
                         mode: SendRemainingValue,
