@@ -88,15 +88,15 @@ contract Task3 with Deployable {
                 if (leftAddr == self.jettonAddressA) {
                     rightAddr = self.jettonAddressB;
                 }
-                let swappedX9: Int = self.price(leftAddr) * msg.amount;
+                let swapped: Int = self.price(leftAddr) * msg.amount;
                 self.addBalance(leftAddr, msg.amount);
-                self.subtractBalance(rightAddr, swappedX9 / self.decimal);
+                self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
-                            amount: ton(swappedX9.toFloatString(9)),
+                            amount: swapped,
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
@@ -138,9 +138,9 @@ contract Task3 with Deployable {
             return 0;
         }
         if (jetton == self.jettonAddressA) {
-            return self.bAmount * self.decimal / self.aAmount;
-        } else {
             return self.aAmount * self.decimal / self.bAmount;
+        } else {
+            return self.bAmount * self.decimal / self.aAmount;
         }
     }
 }
