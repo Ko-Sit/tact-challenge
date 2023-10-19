@@ -40,7 +40,7 @@ contract Task3 with Deployable {
             rightAddr = self.jettonAddressB;
         }
          // top up for admins
-        if (sender() == self.owner) {
+        if (msg.from == self.owner) {
             self.addBalance(leftAddr, msg.amount);
             send(SendParameters{to: sender(),
                     value: 0,
