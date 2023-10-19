@@ -49,25 +49,7 @@ contract Task3 with Deployable {
         let pr: Pair = self.getPair(tokenAddr);
         // top up for admins
         if (msg.from == self.owner) {
-            if (tokenAddr == self.jettonAddressA) {
-                self.addBalance(pr.left.addr, msg.amount);
-            } else {
-                self.addBalance(pr.right.addr, msg.amount);
-            }
-            send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: true,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: msg.amount,
-                        destination: msg.from,
-                        responseDestination: msg.from,
-                        customPayload: null,
-                        forwardTonAmount: 0,
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                }
-            );
+            self.addBalance(pr.left.addr, msg.amount);
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
