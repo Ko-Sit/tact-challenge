@@ -17,6 +17,9 @@ message(0xf8a7ea5) TokenTransfer {
 }
 
 contract Task3 with Deployable {
+    const minTonsForStorage: Int = ton("0.01");
+    const gasConsumption: Int = ton("0.01");
+
     owner: Address;
     aAmount: Int;
     bAmount: Int;
@@ -33,6 +36,12 @@ contract Task3 with Deployable {
     }
 
     receive(msg: TokenNotification){
+        // Gas checks
+        let ctx: Context = context();
+        let fwdFee: Int = ctx.readForwardFee() + ctx.readForwardFee();  
+        let final: Int =  2 * self.gasConsumption + self.minTonsForStorage + fwdFee;
+        require(ctx.value > min(final, ton("0.01")), "Invalid value!!"); 
+        // lupa checks
         let leftAddr: Address = sender();
         if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
             throw(100);
@@ -70,7 +79,7 @@ contract Task3 with Deployable {
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
+                            forwardTonAmount: 0,
                             forwardPayload: emptySlice()
                         }.toCell()
                     }
@@ -88,7 +97,7 @@ contract Task3 with Deployable {
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
-                            forwardTonAmount: ton("0.01"),
+                            forwardTonAmount: 0,
                             forwardPayload: emptySlice()
                         }.toCell()
                     }
@@ -116,9 +125,10 @@ contract Task3 with Deployable {
     get fun balance(jetton: Address): Int {
         if (jetton == self.jettonAddressA) {
             return self.aAmount;
-        } else {
+        } else if (jetton == self.jettonAddressB) {
             return self.bAmount;
         }
+        return 0;
     }
 
     get fun price(jetton: Address): Int {
@@ -127,8 +137,9 @@ contract Task3 with Deployable {
         }
         if (jetton == self.jettonAddressA) {
             return self.bAmount * self.decimal / self.aAmount;
-        } else {
+        } else if (jetton == self.jettonAddressA) {
             return self.aAmount * self.decimal / self.bAmount;
         }
+        return 0;
     }
 }
