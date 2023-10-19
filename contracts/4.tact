@@ -31,7 +31,7 @@ contract Task4 with Deployable {
     }
 
     receive(msg: OwnershipAssigned){
-        if (self.nftAddress != null) {
+        if (self.nft() != null) {
             send(SendParameters{to: sender(),
                     bounce: true,
                     value: 0,
@@ -77,7 +77,10 @@ contract Task4 with Deployable {
     }
 
     get fun time(): Int {
-       return self.releaseTime!! - now();
+        if (self.releaseTime != null) {
+            return self.releaseTime!! - now();
+        }
+        return 0;
     }
 
     get fun nft(): Address? {
