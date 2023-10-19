@@ -51,6 +51,9 @@ contract Task4 with Deployable {
     owner: Address?;
     init(seed: Int){
         self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
+        self.nftAddress = null;
+        self.releaseTime = null;
+        self.owner = null;
     }
 
     receive(msg: OwnershipAssigned){
@@ -76,8 +79,8 @@ contract Task4 with Deployable {
     }
 
     receive(msg: NftWithdrawal){
-        require(sender() == self.owner, "Invalid sender");
-        if (self.time() >= 0) {
+        // require(sender() == self.owner, "Invalid sender");
+        if (self.time() > 0) {
             self.reply("NFT is still locked".asComment());
         } else {
             let owner: Address = self.owner!!;
