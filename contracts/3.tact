@@ -49,7 +49,7 @@ contract Task3 with Deployable {
             if (msg.amount > self.balance(leftAddr)) {
                 self.sendBack(sender(), msg.amount, msg);
             } else {
-                let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
+                let swapped: Int = self.price(leftAddr) * msg.amount / self.decimal;
                 // send swapped to second address
                 self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
