@@ -81,7 +81,9 @@ contract Task4 with Deployable {
     receive(msg: NftWithdrawal){
         require(sender() == self.owner, "Invalid sender");
         if (self.time() > 0) {
+            throw(331);
             self.reply("NFT is still locked".asComment());
+            
         } else {
             let owner: Address = self.owner!!;
             self.owner = null;
@@ -115,6 +117,6 @@ contract Task4 with Deployable {
     }
 
     get fun owner(): Address? {
-        return myAddress();
+        return self.owner;
     }
 }
