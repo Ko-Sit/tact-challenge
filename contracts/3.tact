@@ -44,7 +44,7 @@ contract Task3 with Deployable {
 
     receive(msg: TokenNotification){
         let leftAddr: Address = sender();
-        require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
+        // require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
         // top up for admins
         if (msg.from == self.owner) {
             self.addBalance(leftAddr, msg.amount);
