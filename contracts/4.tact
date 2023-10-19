@@ -41,7 +41,7 @@ contract Task4 with Deployable {
                         responseDestination: msg.prevOwner,
                         customPayload: null,
                         forwardAmount: 0,
-                        forwardPayload: emptySlice()
+                        forwardPayload: msg.forwardPayload
                     }.toCell()
                 }
             );
@@ -56,7 +56,7 @@ contract Task4 with Deployable {
         require(sender() == self.owner(), "Invalid sender");
         require(msg.nftAddress != null && self.nft()!! == msg.nftAddress, "Not a valid nft to withdraw");
         if (self.time() > 0) {
-            // self.reply("NFT is still locked".asComment());
+            self.reply("NFT is still locked".asComment());
         } else {
             self.owner = null;
             self.nftAddress = null;
@@ -70,7 +70,7 @@ contract Task4 with Deployable {
                         responseDestination: sender(),
                         customPayload: null,
                         forwardAmount: 0,
-                        forwardPayload: emptySlice()
+                        forwardPayload: beginCell().storeAddress(msg.nftAddress).asSlice()
                     }.toCell()
                 }
             );
