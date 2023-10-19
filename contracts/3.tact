@@ -63,27 +63,44 @@ contract Task3 with Deployable {
             );
         } else {
             // check if incoming < jetton available
-            let rightAddr: Address = self.jettonAddressA;
-            if (leftAddr == self.jettonAddressA) {
-                rightAddr = self.jettonAddressB;
-            }
-            let swapped: Int = (self.balance(rightAddr) * msg.amount * self.decimal) / (self.balance(leftAddr) * self.decimal);
-            self.addBalance(leftAddr, msg.amount);
-            self.subtractBalance(rightAddr, swapped);
-            send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: true,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: swapped,
-                        destination: msg.from,
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: 0,
-                        forwardPayload: emptySlice()
-                    }.toCell()
+            if (self.balance(leftAddr) < msg.amount || self.aAmount == 0 || self.bAmount == 0) {
+                send(SendParameters{to: sender(),
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: msg.amount,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
+            } else {
+                let rightAddr: Address = self.jettonAddressA;
+                if (leftAddr == self.jettonAddressA) {
+                    rightAddr = self.jettonAddressB;
                 }
-            );
+                let swapped: Int = self.balance(rightAddr) * msg.amount * self.decimal / self.balance(leftAddr) / self.decimal;
+                self.addBalance(leftAddr, msg.amount);
+                self.subtractBalance(rightAddr, swapped);
+                send(SendParameters{to: sender(),
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: swapped,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: 0,
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
+            }
         }
     }
 
