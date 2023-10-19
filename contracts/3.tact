@@ -37,6 +37,7 @@ contract Task3 with Deployable {
         if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
             throw(100);
         }
+        require(msg.amount > 0, "zero");
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
