@@ -41,30 +41,31 @@ contract Task3 with Deployable {
             send(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
-                    bounce: false,
+                    bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: 0,
                         destination: msg.from,
                         responseDestination: myAddress(),
                         customPayload: null,
-                        forwardTonAmount: 0,
+                        forwardTonAmount: ton("0.01"),
                         forwardPayload: emptySlice()
                     }.toCell()
                 }
             );
         } else {
+            require(self.aAmount > 0 && self.bAmount > 0, "zero amount");
             // check if incoming < jetton available
-            if (self.balance(leftAddr) < msg.amount || self.aAmount == 0 || self.bAmount == 0) {
+            if (self.balance(leftAddr) < msg.amount) {
                 send(SendParameters{to: sender(),
                         value: 0,
-                        mode: SendIgnoreErrors,
-                        bounce: false,
+                        mode: SendRemainingValue,
+                        bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
-                            forwardTonAmount: 0,
+                            forwardTonAmount: ton("0.01"),
                             forwardPayload: emptySlice()
                         }.toCell()
                     }
@@ -79,7 +80,7 @@ contract Task3 with Deployable {
                 self.subtractBalance(rightAddr, swapped);
                 send(SendParameters{to: sender(),
                         value: 0,
-                        mode: SendPayGasSeparately + SendIgnoreErrors,
+                        mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
@@ -124,9 +125,9 @@ contract Task3 with Deployable {
             return 0;
         }
         if (jetton == self.jettonAddressA) {
-            return self.bAmount * self.decimal / self.aAmount;
+            return self.bAmount * self.decimal / self.aAmount / self.decimal;
         } else {
-            return self.aAmount * self.decimal / self.bAmount;
+            return self.aAmount * self.decimal / self.bAmount / self.decimal;
         }
     }
 }
