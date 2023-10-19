@@ -35,9 +35,9 @@ contract Task3 with Deployable {
     receive(msg: TokenNotification){
         require(sender() == self.jettonAddressA || sender() == self.jettonAddressB, "suct");
         let leftAddr: Address = sender();
-        let rightAddr: Address = self.jettonAddressA;
-        if (leftAddr == self.jettonAddressA) {
-            rightAddr = self.jettonAddressB;
+        let rightAddr: Address = self.jettonAddressB;
+        if (leftAddr == self.jettonAddressB) {
+            rightAddr = self.jettonAddressA;
         }
         // top up for admins
         if (msg.from == self.owner) {
@@ -74,32 +74,32 @@ contract Task3 with Deployable {
     }
 
      fun addBalance(jetton: Address, amt: Int) {
-        if (jetton == self.jettonAddressA) {
-            self.aAmount = self.aAmount + amt;
-        } else {
+        if (jetton == self.jettonAddressB) {
             self.bAmount = self.bAmount + amt;
+        } else {
+            self.aAmount = self.aAmount + amt;
         }
     }
 
      fun subtractBalance(jetton: Address, amt: Int) {
-        if (jetton == self.jettonAddressA) {
-            self.aAmount = self.aAmount - amt;
-        } else {
+        if (jetton == self.jettonAddressB) {
             self.bAmount = self.bAmount - amt;
+        } else {
+            self.aAmount = self.aAmount - amt;
         }
     }
 
     get fun balance(jetton: Address): Int {
-        if (jetton == self.jettonAddressA) {
-            return self.aAmount;
+        if (jetton == self.jettonAddressB) {
+            return self.bAmount;
         } 
-        return self.bAmount;
+        return self.aAmount;
     }
 
     get fun price(jetton: Address): Int {
-        if (jetton == self.jettonAddressA) {
-            return self.bAmount * self.decimal / self.aAmount;
+        if (jetton == self.jettonAddressB) {
+            return self.aAmount * self.decimal / self.bAmount;
         } 
-        return self.aAmount * self.decimal / self.bAmount;
+        return self.bAmount * self.decimal / self.aAmount;
     }
 }
