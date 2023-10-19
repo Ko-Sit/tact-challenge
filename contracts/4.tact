@@ -75,10 +75,7 @@ contract Task4 with Deployable {
     }
 
     get fun time(): Int {
-        if (self.owner == null) {
-            return 0;
-        }
-        if (self.releaseTime != null) {
+        if (self.owner != null) {
             return self.releaseTime!! - now();
         }
         return 0;

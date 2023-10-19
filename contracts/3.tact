@@ -56,7 +56,7 @@ contract Task3 with Deployable {
                     bounce: true,
                     body: TokenTransfer{queryId: msg.queryId,
                         amount: 0,
-                        destination: msg.from,
+                        destination: self.owner,
                         responseDestination: msg.from,
                         customPayload: null,
                         forwardTonAmount: 0,
@@ -85,9 +85,9 @@ contract Task3 with Deployable {
                 // return swapped bal(2,10) - inc(+1, -5) - res(3, 5);
                 // A-B (amtB * decimal / amtA) * tokenA / decimal
                 // 2A+1A->3B => 1x1 price, return 1B
-                self.addBalance(pr.left.addr, msg.amount);
-                pr.left.amt = pr.left.amt + msg.amount;
+                // TODO top up balance before swap
                 let swapped: Int = (pr.right.amt * self.decimal) / (pr.left.amt * msg.amount) / self.decimal;
+                self.addBalance(pr.left.addr, msg.amount);
                 self.subtractBalance(pr.right.addr, swapped);
                 send(SendParameters{to: sender(),
                         value: 0,
@@ -151,8 +151,11 @@ contract Task3 with Deployable {
     }
 
     get fun balance(jetton: Address): Int {
-        let amt: Int = self.getPool(jetton).amt;
-        return amt;
+        if (jetton == self.jettonAddressA) {
+            return self.aAmount;
+        } else {
+            return self.bAmount;
+        }
     }
     
     get fun price(jetton: Address): Int {
