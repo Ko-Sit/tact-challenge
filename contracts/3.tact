@@ -19,7 +19,6 @@ message(0xf8a7ea5) TokenTransfer {
 contract Task3 with Deployable {
     const minTonsForStorage: Int = ton("0.01");
     const gasConsumption: Int = ton("0.01");
-
     owner: Address;
     aAmount: Int;
     bAmount: Int;
@@ -38,15 +37,14 @@ contract Task3 with Deployable {
     receive(msg: TokenNotification){
         // Gas checks
         let ctx: Context = context();
-        let fwdFee: Int = ctx.readForwardFee() + ctx.readForwardFee();  
-        let final: Int =  2 * self.gasConsumption + self.minTonsForStorage + fwdFee;
-        require(ctx.value > min(final, ton("0.01")), "Invalid value!!"); 
+        let fwdFee: Int = ctx.readForwardFee() + ctx.readForwardFee();
+        let final: Int = 2 * self.gasConsumption + self.minTonsForStorage + fwdFee;
+        require(ctx.value > min(final, ton("0.01")), "Invalid value!!");
         // lupa checks
         let leftAddr: Address = sender();
         if (leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
             throw(100);
         }
-        require(msg.amount > 0, "zero");
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
@@ -76,6 +74,21 @@ contract Task3 with Deployable {
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
+            } else if (msg.amount > 0) {
+                send(SendParameters{to: rightAddr,
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: 0,
                             destination: msg.from,
                             responseDestination: myAddress(),
                             customPayload: null,
