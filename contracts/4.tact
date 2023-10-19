@@ -1,4 +1,5 @@
 import "@stdlib/deploy";
+
 /*
   TASK 4 - NFT locker
   Implement a smart contract that will lock NFT for a period of time specified by the owner.
@@ -52,41 +53,21 @@ contract Task4 with Deployable {
         self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
     }
 
-     fun alreadyInitialized(msg: OwnershipAssigned) {
-        send(SendParameters{to: sender(),
-                bounce: true,
-                value: 0,
-                mode: SendRemainingValue,
-                body: Transfer{queryId: msg.queryId,
-                    newOwner: msg.prevOwner,
-                    responseDestination: msg.prevOwner,
-                    customPayload: null,
-                    forwardAmount: 0,
-                    forwardPayload: msg.forwardPayload
-                }.toCell()
-            }
-        );
-    }
-
-     fun unlockNft(msg: NftWithdrawal) {
-        send(SendParameters{to: msg.nftAddress,
-                bounce: true,
-                mode: SendRemainingBalance,
-                value: 0,
-                body: Transfer{queryId: msg.queryId,
-                    newOwner: self.owner!!,
-                    responseDestination: self.owner!!,
-                    customPayload: null,
-                    forwardAmount: 0,
-                    forwardPayload: beginCell().storeAddress(msg.nftAddress).asSlice()
-                }.toCell()
-            }
-        );
-    }
-
     receive(msg: OwnershipAssigned){
         if (self.nftAddress != null) {
-            self.alreadyInitialized(msg);
+            send(SendParameters{to: sender(),
+                    bounce: true,
+                    value: 0,
+                    mode: SendRemainingValue,
+                    body: Transfer{queryId: msg.queryId,
+                        newOwner: msg.prevOwner,
+                        responseDestination: msg.prevOwner,
+                        customPayload: null,
+                        forwardAmount: 0,
+                        forwardPayload: msg.forwardPayload
+                    }.toCell()
+                }
+            );
         } else {
             self.owner = msg.prevOwner;
             self.nftAddress = sender();
@@ -99,8 +80,23 @@ contract Task4 with Deployable {
         if (self.time() >= 0) {
             self.reply("NFT is still locked".asComment());
         } else {
-            require(msg.nftAddress == self.nftAddress!!, "Not a valid nft");
-            self.unlockNft(msg);
+            let owner: Address = self.owner!!;
+            self.owner = null;
+            self.nftAddress = null;
+            self.releaseTime = null;
+            send(SendParameters{to: msg.nftAddress,
+                    bounce: true,
+                    mode: SendRemainingValue,
+                    value: 0,
+                    body: Transfer{queryId: msg.queryId,
+                        newOwner: owner,
+                        responseDestination: owner,
+                        customPayload: null,
+                        forwardAmount: 0,
+                        forwardPayload: beginCell().storeAddress(msg.nftAddress).asSlice()
+                    }.toCell()
+                }
+            );
         }
     }
 
