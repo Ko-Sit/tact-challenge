@@ -1,4 +1,5 @@
 import "@stdlib/deploy";
+
 message(0x44) Refund {
     queryId: Int as uint64;
     sender: Address;
@@ -12,18 +13,15 @@ contract Task2 with Deployable {
 
     receive(msg: Refund){
         require(sender() == self.admin, "n");
-        nativeSendMessage(beginCell().storeInt(0x18, 6).storeAddress(self.admin).storeCoins(0).storeInt(0,
-                1 + 4 + 4 + 64 + 32 + 1 + 1
-            ).endCell(),
-            SendRemainingValue
-        );
+        send(SendParameters{to: msg.sender, value: 0, mode: SendRemainingValue});
     }
 
     receive(msg: Slice){
-        nativeSendMessage(beginCell().storeInt(0x18, 6).storeAddress(self.admin).storeCoins(0).storeInt(0,
-                1 + 4 + 4 + 64 + 32 + 1 + 1
-            ).storeRef(msg.asCell()).storeAddress(sender()).endCell(),
-            SendRemainingBalance
+        send(SendParameters{to: self.admin,
+                value: 0,
+                mode: SendRemainingBalance,
+                body: beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell()
+            }
         );
     }
 }
