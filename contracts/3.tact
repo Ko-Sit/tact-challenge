@@ -41,43 +41,8 @@ contract Task3 with Deployable {
             rightAddr = self.jettonAddressB;
         }
         // top up for admins
-        if (msg.from == self.owner) {
-            if (isLeft) {
-                self.aAmount = self.aAmount + msg.amount;
-            } else {
-                self.bAmount = self.bAmount + msg.amount;
-            }
-            send(SendParameters{to: leftAddr,
-                    value: 0,
-                    mode: SendRemainingValue,
-                    bounce: true,
-                    body: TokenTransfer{queryId: msg.queryId,
-                        amount: 0,
-                        destination: msg.from,
-                        responseDestination: myAddress(),
-                        customPayload: null,
-                        forwardTonAmount: ton("0.01"),
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                }
-            );
-        } else {
-            if (msg.amount > self.balance(leftAddr)) {
-                send(SendParameters{to: leftAddr,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        bounce: true,
-                        body: TokenTransfer{queryId: msg.queryId,
-                            amount: msg.amount,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                    }
-                );
-            } else {
+        if (msg.from != self.owner) {
+            if (msg.amount <= self.balance(leftAddr)) {
                 let swapped: Int = self.price(leftAddr) * msg.amount / self.decimal;
                 // send swapped to second address
                 if (isLeft) {
@@ -105,7 +70,42 @@ contract Task3 with Deployable {
                         }.toCell()
                     }
                 );
+            } else {
+                send(SendParameters{to: leftAddr,
+                        value: 0,
+                        mode: SendRemainingValue,
+                        bounce: true,
+                        body: TokenTransfer{queryId: msg.queryId,
+                            amount: msg.amount,
+                            destination: msg.from,
+                            responseDestination: myAddress(),
+                            customPayload: null,
+                            forwardTonAmount: ton("0.01"),
+                            forwardPayload: emptySlice()
+                        }.toCell()
+                    }
+                );
             }
+        } else {
+            if (isLeft) {
+                self.aAmount = self.aAmount + msg.amount;
+            } else {
+                self.bAmount = self.bAmount + msg.amount;
+            }
+            send(SendParameters{to: leftAddr,
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: 0,
+                        destination: msg.from,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         }
     }
 
