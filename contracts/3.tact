@@ -34,7 +34,9 @@ contract Task3 with Deployable {
 
     receive(msg: TokenNotification){
         let leftAddr: Address = sender();
-        require(leftAddr == self.jettonAddressA || leftAddr == self.jettonAddressB, "unknown jetton addr");
+        if(leftAddr != self.jettonAddressA && leftAddr != self.jettonAddressB) {
+            throw(100);
+        }
         let rightAddr: Address = self.jettonAddressA;
         if (leftAddr == self.jettonAddressA) {
             rightAddr = self.jettonAddressB;
