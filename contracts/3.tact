@@ -59,7 +59,7 @@ contract Task3 with Deployable {
         } else {
             let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
             // check if incoming < jetton available
-            if (swapped > self.balance(rightAddr)) {
+            if (swapped == 0 || swapped > self.balance(rightAddr) || self.aAmount == 0 || self.bAmount == 0) {
                 send(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
