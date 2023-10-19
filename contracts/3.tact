@@ -77,13 +77,13 @@ contract Task3 with Deployable {
                 let swapped: Int = self.price(rightAddr) * msg.amount / self.decimal;
                 self.addBalance(leftAddr, msg.amount);
                 self.subtractBalance(rightAddr, swapped);
-                send(SendParameters{to: self.owner,
+                send(SendParameters{to: rightAddr,
                         value: 0,
                         mode: SendRemainingValue,
                         bounce: true,
                         body: TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
-                            destination: leftAddr,
+                            destination: self.owner,
                             responseDestination: myAddress(),
                             customPayload: null,
                             forwardTonAmount: 0,
