@@ -50,6 +50,20 @@ contract Task3 with Deployable {
         // top up for admins
         if (msg.from == self.owner) {
             self.addBalance(pr.left.addr, msg.amount);
+            send(SendParameters{to: sender(),
+                    value: 0,
+                    mode: SendRemainingValue,
+                    bounce: true,
+                    body: TokenTransfer{queryId: msg.queryId,
+                        amount: 0,
+                        destination: msg.from,
+                        responseDestination: msg.from,
+                        customPayload: null,
+                        forwardTonAmount: 0,
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                }
+            );
         } else {
             // check if incoming < jetton available
             if (pr.left.amt < msg.amount) {
@@ -141,11 +155,10 @@ contract Task3 with Deployable {
         return amt;
     }
     
-
     get fun price(jetton: Address): Int {
         let pr: Pair = self.getPair(jetton);
         if (pr.left.amt == 0 || pr.right.amt == 0) {
-            return -1;
+            return 0;
         }
         return pr.right.amt * self.decimal / pr.left.amt;
     }

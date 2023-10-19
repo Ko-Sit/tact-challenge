@@ -55,7 +55,7 @@ contract Task4 with Deployable {
 
     receive(msg: NftWithdrawal){
         require(sender() == self.owner(), "Invalid sender");
-        if (self.time() > now()) {
+        if (self.time() > 0) {
             self.reply("NFT is still locked".asComment());
         } else {
             self.vault = Vault{nftAddress: null, releaseTime: null, owner: null};
