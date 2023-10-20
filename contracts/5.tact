@@ -33,15 +33,32 @@ contract Task5 with Deployable {
   seed: Int as uint128;
   owner: Address;
   nftMap: map<Int as uint16, Address>;
+  currentIndex: Int;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed;
+    self.currentIndex = 0;
   }
+
+  fun adminAddNft(nftAddress: Address) {
+      self.nftMap.set(self.currentIndex, nftAddress);
+      self.currentIndex = self.currentIndex + 1;
+  }
+
+    fun swapNft(newNftAddress: Address): Address {
+        // from <= x <= to 
+        // TODO or check if empty here
+      let randomIndex: Int = random(0, self.currentIndex - 1);
+      let nftFromPool: Address = self.nftMap.get(randomIndex)!!;
+      self.nftMap.set(randomIndex, newNftAddress);
+      return nftFromPool;
+   }
 
   receive(msg: OwnershipAssigned) {
         if (msg.prevOwner == self.owner) {
             // add from admin
+            self.adminAddNft(sender());
             send(SendParameters{to: sender(),
                 value: 0,
                 mode: SendRemainingValue,
@@ -72,8 +89,9 @@ contract Task5 with Deployable {
                 });
            } else {
                 // enough ton, do swap
+                // TODO check if pool is not empty
                 // get random nft address
-                let newNftAddress: Address = newAddress(0, 0);
+                let newNftAddress: Address = self.swapNft(sender());
                 // send 
                 send(SendParameters{to: newNftAddress,
                     mode: SendRemainingValue,
