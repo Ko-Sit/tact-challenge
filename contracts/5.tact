@@ -43,19 +43,19 @@ contract Task5 with Deployable {
         if (msg.prevOwner == self.owner) {
             // add from admin
             send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    body: Transfer{queryId: msg.queryId,
-                        newOwner: msg.prevOwner,
-                        responseDestination: msg.prevOwner,
-                        customPayload: null,
-                        forwardAmount: 0,
-                        forwardPayload: emptySlice()
-                    }.toCell()
-                }
-            );
+                value: 0,
+                mode: SendRemainingValue,
+                body: Transfer{queryId: msg.queryId,
+                    newOwner: msg.prevOwner,
+                    responseDestination: msg.prevOwner,
+                    customPayload: null,
+                    forwardAmount: 0,
+                    forwardPayload: emptySlice()
+                }.toCell()
+            });
         } else {
             // can refund for small amounts
+            // TODO check if min should be 0.1 or 0.2
            require(context().value > self.minTonForOperation, "not enough ton for swap");
            // make refund - small incoming balance 
            if (context().value < ton("2.1")) {
@@ -69,10 +69,23 @@ contract Task5 with Deployable {
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-                }
-            );
+                });
            } else {
-
+                // enough ton, do swap
+                // get random nft address
+                let newNftAddress: Address = newAddress(0, 0);
+                // send 
+                send(SendParameters{to: newNftAddress,
+                    mode: SendRemainingValue,
+                    value: context().value - ton("2.0"),
+                    body: Transfer{queryId: msg.queryId,
+                        newOwner: msg.prevOwner,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardAmount: 0,
+                        forwardPayload: emptySlice()
+                    }.toCell()
+                });
            }
 
         }
