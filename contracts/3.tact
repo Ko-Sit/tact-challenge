@@ -92,7 +92,7 @@ contract Task3 with Deployable {
             .storeInt(0x18, 6)
             .storeAddress(to)
             .storeCoins(0)
-            .storeUint(0, 1 + 4 + 4 + 64 + 32)
+            .storeUint(0, 105)
             .storeBool(false).storeBool(true)
             .storeRef(body);
         
