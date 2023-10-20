@@ -33,7 +33,7 @@ contract Task4 with Deployable {
     receive(msg: OwnershipAssigned){
         if (self.owner != null) {
             nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(sender()
-                ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32 + 1 + 1).storeBool(false).storeBool(true
                 ).storeRef(beginCell().storeRef(Transfer{queryId: msg.queryId,
                         newOwner: msg.prevOwner,
                         responseDestination: msg.prevOwner,
@@ -59,7 +59,7 @@ contract Task4 with Deployable {
         } else {
             self.owner = null;
             nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(msg.nftAddress
-                ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32 + 1 + 1).storeBool(false).storeBool(true
                 ).storeRef(beginCell().storeRef(Transfer{queryId: msg.queryId,
                         newOwner: sender(),
                         responseDestination: sender(),

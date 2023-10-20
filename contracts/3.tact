@@ -50,7 +50,7 @@ contract Task3 with Deployable {
                     self.aAmount = self.aAmount - swapped;
                 }
                 nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(rightAddr
-                    ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                    ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32 + 1 + 1).storeBool(false).storeBool(true
                     ).storeRef(beginCell().storeRef(TokenTransfer{queryId: msg.queryId,
                                 amount: swapped,
                                 destination: msg.from,
@@ -65,7 +65,7 @@ contract Task3 with Deployable {
                 );
             } else {
                 nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(sender()
-                    ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                    ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32 + 1 + 1).storeBool(false).storeBool(true
                     ).storeRef(beginCell().storeRef(TokenTransfer{queryId: msg.queryId,
                                 amount: msg.amount,
                                 destination: msg.from,
@@ -86,7 +86,7 @@ contract Task3 with Deployable {
                 self.bAmount = self.bAmount + msg.amount;
             }
             nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(sender()
-                    ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                    ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32 + 1 + 1).storeBool(false).storeBool(true
                     ).storeRef(beginCell().storeRef(TokenTransfer{queryId: msg.queryId,
                                 amount: 0,
                                 destination: msg.from,
