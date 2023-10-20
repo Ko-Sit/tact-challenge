@@ -89,7 +89,7 @@ contract Task3 with Deployable {
 
     fun mySend(to: Address, mode: Int, body: Cell) {
         let b: Builder = beginCell()
-            .storeInt(1, 2)
+            .storeInt(0x18, 6)
             .storeAddress(to)
             .storeCoins(0)
             .storeUint(0, 1 + 4 + 4 + 64 + 32)
