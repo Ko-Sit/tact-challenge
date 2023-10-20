@@ -42,7 +42,7 @@ contract Task4 with Deployable {
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-                }
+            }
             );
         } else {
             self.owner = msg.prevOwner;
@@ -67,7 +67,7 @@ contract Task4 with Deployable {
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-                }
+            }
             );
         }
     }
