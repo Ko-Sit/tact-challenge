@@ -8,7 +8,7 @@ import "@stdlib/deploy";
   Admin can deposit NFTs without swap logic. Any NFT received from the admin is considered deposited. Admin can't swap.
   Admin can withdraw all NFTs at once, and also all TONs collected from users as fees.
   Implement getter that will return NFT addresses held by the smart contract.
-  Implement getter that will return the amount of admin`s profit collected.
+  Implement getter that will return the totalAmt of admin`s profit collected.
 
   In details, the smart contract (later: SC) should have this logic:
   Messages
@@ -60,31 +60,48 @@ message(0x5fcc3d14) Transfer {
     newOwner: Address; 
     responseDestination: Address; 
     customPayload: Cell?; 
-    forwardAmount: Int as coins; 
+    forwardtotalAmt: Int as coins; 
     forwardPayload: Slice as remaining; 
 }
 
 contract Task5 with Deployable {
+  const minTonForStorage: Int = ton("0.01");
   seed: Int as uint128;
   owner: Address;
+  nftMap: map<Int as uint16, Address>;
   
   init(seed: Int, owner: Address) {
     self.owner = owner;
-    self.seed = seed; // needed to deploy multiple smart contracts copies from one admin address
+    self.seed = seed;
   }
 
   receive(msg: OwnershipAssigned) {
   }
 
   receive(msg: AdminWithdrawalProfit) {
+    require(sender() == self.owner, "Insufficient privelegies");
+    let totalAmt: Int = self.profit();
+    require(totalAmt > 0, "Insufficient balance");
+     send(SendParameters{
+        to: sender(), 
+        value: totalAmt,
+        bounce: true,
+        mode: SendRemainingValue,
+        body: AdminFetchProfit{
+            queryId: msg.queryId
+        }.toCell()
+    });
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
+    require(sender() == self.owner, "Invalid sender");
   }
 
   get fun profit(): Int { 
+    return myBalance() - ton("0.1");
   }
   
   get fun nfts(): map<Int as uint16, Address> { 
+    return self.nftMap;
   }
 }
