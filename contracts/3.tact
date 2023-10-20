@@ -61,7 +61,7 @@ contract Task3 with Deployable {
                             }.toCell()
                         ).endCell()
                     ).endCell(),
-                    SendRemainingBalance
+                    SendRemainingValue
                 );
             } else {
                 nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(sender()
@@ -76,7 +76,7 @@ contract Task3 with Deployable {
                             }.toCell()
                         ).endCell()
                     ).endCell(),
-                    SendRemainingBalance
+                    SendRemainingValue
                 );
             }
         } else {
@@ -97,7 +97,7 @@ contract Task3 with Deployable {
                             }.toCell()
                         ).endCell()
                     ).endCell(),
-                    SendRemainingBalance
+                    SendRemainingValue
                 );
         }
     }
