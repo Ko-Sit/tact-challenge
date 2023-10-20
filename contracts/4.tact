@@ -87,7 +87,8 @@ contract Task4 with Deployable {
             .storeInt(0x18, 6)
             .storeAddress(to)
             .storeCoins(0)
-            .storeUint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .storeUint(0, 1 + 4 + 4 + 64 + 32)
+            .storeBool(false).storeBool(true)
             .storeRef(body);
         
         nativeSendMessage(b.endCell(), mode);
