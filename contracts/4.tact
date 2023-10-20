@@ -32,7 +32,7 @@ contract Task4 with Deployable {
 
     receive(msg: OwnershipAssigned){
         if (self.owner != null) {
-            send(SendParameters{to: sender(),
+            self.mySend(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
                     body: Transfer{queryId: msg.queryId,
@@ -57,7 +57,7 @@ contract Task4 with Deployable {
             self.reply("NFT is still locked".asComment());
         } else {
             self.owner = null;
-            send(SendParameters{to: msg.nftAddress,
+            self.mySend(SendParameters{to: msg.nftAddress,
                     mode: SendRemainingValue,
                     value: 0,
                     body: Transfer{queryId: msg.queryId,
@@ -88,5 +88,26 @@ contract Task4 with Deployable {
 
     get fun owner(): Address? {
         return self.owner;
+    }
+
+    fun mySend(params: SendParameters) {
+        let b: Builder = beginCell()
+            .storeInt(1, 2)
+            .storeBool(params.bounce)
+            .storeInt(0, 3)
+            .storeAddress(params.to)
+            .storeCoins(params.value)
+            .storeInt(0, 1 + 4 + 4 + 64 + 32); 
+
+        let body: Cell? = params.body;
+        if (body != null) {
+            b.storeBool(true);
+            b.storeRef(body!!);
+        } else {
+            b.storeBool(false); 
+        }
+        
+        let c: Cell = b.endCell();
+        nativeSendMessage(c, params.mode);
     }
 }

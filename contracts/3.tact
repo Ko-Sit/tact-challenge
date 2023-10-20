@@ -49,7 +49,7 @@ contract Task3 with Deployable {
                     self.bAmount = self.bAmount + msg.amount;
                     self.aAmount = self.aAmount - swapped;
                 }
-                send(SendParameters{to: rightAddr,
+                self.mySend(SendParameters{to: rightAddr,
                         value: 0,
                         mode: SendRemainingValue,
                         body: TokenTransfer{queryId: msg.queryId,
@@ -63,7 +63,7 @@ contract Task3 with Deployable {
                     }
                 );
             } else {
-                send(SendParameters{to: sender(),
+                self.mySend(SendParameters{to: sender(),
                         value: 0,
                         mode: SendRemainingValue,
                         body: TokenTransfer{queryId: msg.queryId,
@@ -83,7 +83,7 @@ contract Task3 with Deployable {
             } else {
                 self.bAmount = self.bAmount + msg.amount;
             }
-            send(SendParameters{to: sender(),
+            self.mySend(SendParameters{to: sender(),
                     value: 0,
                     mode: SendRemainingValue,
                     body: TokenTransfer{queryId: msg.queryId,
@@ -97,6 +97,27 @@ contract Task3 with Deployable {
                 }
             );
         }
+    }
+
+    fun mySend(params: SendParameters) {
+        let b: Builder = beginCell()
+            .storeInt(1, 2)
+            .storeBool(params.bounce)
+            .storeInt(0, 3)
+            .storeAddress(params.to)
+            .storeCoins(params.value)
+            .storeInt(0, 1 + 4 + 4 + 64 + 32); 
+
+        let body: Cell? = params.body;
+        if (body != null) {
+            b.storeBool(true);
+            b.storeRef(body!!);
+        } else {
+            b.storeBool(false); 
+        }
+        
+        let c: Cell = b.endCell();
+        nativeSendMessage(c, params.mode);
     }
 
     get fun balance(jetton: Address): Int {
