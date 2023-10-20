@@ -18,11 +18,10 @@ contract Task2 with Deployable {
     }
 
     receive(msg: Slice){
-        send(SendParameters{to: self.admin,
-                value: 0,
-                mode: SendRemainingBalance,
-                body: beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell()
-            }
+         nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(self.admin).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false)
+         .storeRef(beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell())
+         .endCell(),
+            SendRemainingBalance
         );
     }
 }
