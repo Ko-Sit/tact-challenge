@@ -38,12 +38,12 @@ contract Task5 with Deployable {
   init(seed: Int, owner: Address) {
     self.owner = owner;
     self.seed = seed;
-    self.currentIndex = 0;
+    self.currentIndex = -1;
   }
 
   fun adminAddNft(nftAddress: Address) {
-      self.nftMap.set(self.currentIndex, nftAddress);
-      self.currentIndex = self.currentIndex + 1;
+    self.currentIndex = self.currentIndex + 1;
+    self.nftMap.set(self.currentIndex, nftAddress);
   }
 
     fun swapNft(newNftAddress: Address): Address {
@@ -125,7 +125,14 @@ contract Task5 with Deployable {
   }
 
   receive(msg: AdminWithdrawalAllNFTs) {
+    require(context().value >= ton("1") + self.totalNftHeld() * ton("0.08"), "Insufficent funds");
     require(sender() == self.owner, "Invalid sender");
+
+    
+  }
+
+  get fun totalNftHeld(): Int { 
+    return self.currentIndex + 1;
   }
 
   get fun profit(): Int { 
