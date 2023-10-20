@@ -84,13 +84,10 @@ contract Task4 with Deployable {
 
     fun mySend(to: Address, mode: Int, body: Cell) {
         let b: Builder = beginCell()
-            .storeInt(1, 2)
-            .storeBool(true)
-            .storeInt(0, 3)
+            .storeInt(0x18, 6)
             .storeAddress(to)
             .storeCoins(0)
-            .storeInt(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-            .storeBool(true)
+            .storeUint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
             .storeRef(body);
         
         nativeSendMessage(b.endCell(), mode);
