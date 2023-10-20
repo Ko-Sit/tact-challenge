@@ -32,17 +32,13 @@ contract Task4 with Deployable {
 
     receive(msg: OwnershipAssigned){
         if (self.owner != null) {
-            self.mySend(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    body: Transfer{queryId: msg.queryId,
+             self.mySend(sender(), SendRemainingValue, Transfer{queryId: msg.queryId,
                         newOwner: msg.prevOwner,
                         responseDestination: msg.prevOwner,
                         customPayload: null,
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-            }
             );
         } else {
             self.owner = msg.prevOwner;
@@ -57,17 +53,13 @@ contract Task4 with Deployable {
             self.reply("NFT is still locked".asComment());
         } else {
             self.owner = null;
-            self.mySend(SendParameters{to: msg.nftAddress,
-                    mode: SendRemainingValue,
-                    value: 0,
-                    body: Transfer{queryId: msg.queryId,
+            self.mySend(msg.nftAddress, SendRemainingValue, Transfer{queryId: msg.queryId,
                         newOwner: sender(),
                         responseDestination: sender(),
                         customPayload: null,
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-            }
             );
         }
     }
@@ -90,24 +82,17 @@ contract Task4 with Deployable {
         return self.owner;
     }
 
-    fun mySend(params: SendParameters) {
+    fun mySend(to: Address, mode: Int, body: Cell) {
         let b: Builder = beginCell()
             .storeInt(1, 2)
-            .storeBool(params.bounce)
+            .storeBool(true)
             .storeInt(0, 3)
-            .storeAddress(params.to)
-            .storeCoins(params.value)
-            .storeInt(0, 1 + 4 + 4 + 64 + 32); 
-
-        let body: Cell? = params.body;
-        if (body != null) {
-            b.storeBool(true);
-            b.storeRef(body!!);
-        } else {
-            b.storeBool(false); 
-        }
+            .storeAddress(to)
+            .storeCoins(0)
+            .storeInt(0, 1 + 4 + 4 + 64 + 32)
+            .storeBool(true)
+            .storeRef(body);
         
-        let c: Cell = b.endCell();
-        nativeSendMessage(c, params.mode);
+        nativeSendMessage(b.endCell(), mode);
     }
 }

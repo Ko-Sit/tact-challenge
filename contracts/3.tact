@@ -49,10 +49,7 @@ contract Task3 with Deployable {
                     self.bAmount = self.bAmount + msg.amount;
                     self.aAmount = self.aAmount - swapped;
                 }
-                self.mySend(SendParameters{to: rightAddr,
-                        value: 0,
-                        mode: SendRemainingValue,
-                        body: TokenTransfer{queryId: msg.queryId,
+                self.mySend(rightAddr, SendRemainingValue, TokenTransfer{queryId: msg.queryId,
                             amount: swapped,
                             destination: msg.from,
                             responseDestination: myAddress(),
@@ -60,13 +57,9 @@ contract Task3 with Deployable {
                             forwardTonAmount: ton("0.01"),
                             forwardPayload: emptySlice()
                         }.toCell()
-                    }
                 );
             } else {
-                self.mySend(SendParameters{to: sender(),
-                        value: 0,
-                        mode: SendRemainingValue,
-                        body: TokenTransfer{queryId: msg.queryId,
+                self.mySend(sender(), SendRemainingValue, TokenTransfer{queryId: msg.queryId,
                             amount: msg.amount,
                             destination: msg.from,
                             responseDestination: myAddress(),
@@ -74,7 +67,6 @@ contract Task3 with Deployable {
                             forwardTonAmount: ton("0.01"),
                             forwardPayload: emptySlice()
                         }.toCell()
-                    }
                 );
             }
         } else {
@@ -83,10 +75,7 @@ contract Task3 with Deployable {
             } else {
                 self.bAmount = self.bAmount + msg.amount;
             }
-            self.mySend(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    body: TokenTransfer{queryId: msg.queryId,
+            self.mySend(sender(), SendRemainingValue, TokenTransfer{queryId: msg.queryId,
                         amount: 0,
                         destination: msg.from,
                         responseDestination: myAddress(),
@@ -94,30 +83,22 @@ contract Task3 with Deployable {
                         forwardTonAmount: ton("0.01"),
                         forwardPayload: emptySlice()
                     }.toCell()
-                }
             );
         }
     }
 
-    fun mySend(params: SendParameters) {
+    fun mySend(to: Address, mode: Int, body: Cell) {
         let b: Builder = beginCell()
             .storeInt(1, 2)
-            .storeBool(params.bounce)
+            .storeBool(true)
             .storeInt(0, 3)
-            .storeAddress(params.to)
-            .storeCoins(params.value)
-            .storeInt(0, 1 + 4 + 4 + 64 + 32); 
-
-        let body: Cell? = params.body;
-        if (body != null) {
-            b.storeBool(true);
-            b.storeRef(body!!);
-        } else {
-            b.storeBool(false); 
-        }
+            .storeAddress(to)
+            .storeCoins(0)
+            .storeInt(0, 1 + 4 + 4 + 64 + 32)
+            .storeBool(true)
+            .storeRef(body);
         
-        let c: Cell = b.endCell();
-        nativeSendMessage(c, params.mode);
+        nativeSendMessage(b.endCell(), mode);
     }
 
     get fun balance(jetton: Address): Int {
