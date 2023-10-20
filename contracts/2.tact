@@ -12,16 +12,15 @@ contract Task2 with Deployable {
 
     receive(msg: Refund){
         require(sender() == self.admin, "n");
-        nativeSendMessage(beginCell().storeInt(0x18, 6).storeInt(0, 3).storeAddress(msg.sender
-            ).storeCoins(0).storeInt(0, 105).storeBool(false).storeBool(false).endCell(),
+        nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(msg.sender).storeCoins(0).storeInt(0, 105).storeBool(false).storeBool(false).endCell(),
             SendRemainingValue
         );
     }
 
     receive(msg: Slice){
-        nativeSendMessage(beginCell().storeInt(0x18, 6).storeInt(0, 3).storeAddress(self.admin
-            ).storeCoins(0).storeInt(0, 105).storeBool(false).storeBool(true
-            ).storeRef(beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell()).endCell(),
+         nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(self.admin).storeCoins(0).storeInt(0, 105).storeBool(false).storeBool(true)
+         .storeRef(beginCell().storeRef(msg.asCell()).storeAddress(sender()).endCell())
+         .endCell(),
             SendRemainingBalance
         );
     }
