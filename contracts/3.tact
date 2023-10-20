@@ -37,11 +37,10 @@ contract Task3 with Deployable {
         if (isLeft) {
             rightAddr = self.jB;
         }
-        // top up for admins
+        // casual user 
         if (msg.from != self.owner) {
             if (msg.amount <= self.balance(sender())) {
                 let swapped: Int = self.price(sender()) * msg.amount / 1000000000;
-                // send swapped to second address
                 if (isLeft) {
                     self.aAmount = self.aAmount + msg.amount;
                     self.bAmount = self.bAmount - swapped;
@@ -49,54 +48,59 @@ contract Task3 with Deployable {
                     self.bAmount = self.bAmount + msg.amount;
                     self.aAmount = self.aAmount - swapped;
                 }
-                self.mySend(rightAddr, SendRemainingValue, TokenTransfer{queryId: msg.queryId,
-                            amount: swapped,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                );
-            } else {
-                self.mySend(sender(), SendRemainingValue, TokenTransfer{queryId: msg.queryId,
-                            amount: msg.amount,
-                            destination: msg.from,
-                            responseDestination: myAddress(),
-                            customPayload: null,
-                            forwardTonAmount: ton("0.01"),
-                            forwardPayload: emptySlice()
-                        }.toCell()
-                );
-            }
-        } else {
-            if (isLeft) {
-                self.aAmount = self.aAmount + msg.amount;
-            } else {
-                self.bAmount = self.bAmount + msg.amount;
-            }
-            self.mySend(sender(), SendRemainingValue, TokenTransfer{queryId: msg.queryId,
-                        amount: 0,
+                nativeSendMessage(beginCell()
+                    .storeInt(0x18, 6)
+                    .storeAddress(rightAddr)
+                    .storeCoins(0)
+                    .storeUint(0, 105)
+                    .storeBool(false).storeBool(true)
+                    .storeRef(TokenTransfer{queryId: msg.queryId,
+                        amount: swapped,
                         destination: msg.from,
                         responseDestination: myAddress(),
                         customPayload: null,
                         forwardTonAmount: ton("0.01"),
                         forwardPayload: emptySlice()
-                    }.toCell()
-            );
+                    }.toCell()).endCell(), SendRemainingValue);
+            } else {
+                // cant swap, return
+                nativeSendMessage(beginCell()
+                    .storeInt(0x18, 6)
+                    .storeAddress(sender())
+                    .storeCoins(0)
+                    .storeUint(0, 105)
+                    .storeBool(false).storeBool(true)
+                    .storeRef(TokenTransfer{queryId: msg.queryId,
+                        amount: msg.amount,
+                        destination: msg.from,
+                        responseDestination: myAddress(),
+                        customPayload: null,
+                        forwardTonAmount: ton("0.01"),
+                        forwardPayload: emptySlice()
+                    }.toCell()).endCell(), SendRemainingValue);
+            }
+        } else {
+            // top up for admins
+            if (isLeft) {
+                self.aAmount = self.aAmount + msg.amount;
+            } else {
+                self.bAmount = self.bAmount + msg.amount;
+            }
+            nativeSendMessage(beginCell()
+                .storeInt(0x18, 6)
+                .storeAddress(sender())
+                .storeCoins(0)
+                .storeUint(0, 105)
+                .storeBool(false).storeBool(true)
+                .storeRef(TokenTransfer{queryId: msg.queryId,
+                    amount: 0,
+                    destination: msg.from,
+                    responseDestination: myAddress(),
+                    customPayload: null,
+                    forwardTonAmount: ton("0.01"),
+                    forwardPayload: emptySlice()
+                }.toCell()).endCell(), SendRemainingValue);
         }
-    }
-
-    fun mySend(to: Address, mode: Int, body: Cell) {
-        let b: Builder = beginCell()
-            .storeInt(0x18, 6)
-            .storeAddress(to)
-            .storeCoins(0)
-            .storeUint(0, 105)
-            .storeBool(false).storeBool(true)
-            .storeRef(body);
-        
-        nativeSendMessage(b.endCell(), mode);
     }
 
     get fun balance(jetton: Address): Int {

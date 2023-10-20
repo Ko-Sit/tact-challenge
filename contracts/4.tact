@@ -32,14 +32,19 @@ contract Task4 with Deployable {
 
     receive(msg: OwnershipAssigned){
         if (self.owner != null) {
-             self.mySend(sender(), SendRemainingValue, Transfer{queryId: msg.queryId,
-                        newOwner: msg.prevOwner,
-                        responseDestination: msg.prevOwner,
-                        customPayload: null,
-                        forwardAmount: 0,
-                        forwardPayload: emptySlice()
-                    }.toCell()
-            );
+            nativeSendMessage(beginCell()
+                .storeInt(0x18, 6)
+                .storeAddress(sender())
+                .storeCoins(0)
+                .storeUint(0, 105)
+                .storeBool(false).storeBool(true)
+                .storeRef(Transfer{queryId: msg.queryId,
+                    newOwner: msg.prevOwner,
+                    responseDestination: msg.prevOwner,
+                    customPayload: null,
+                    forwardAmount: 0,
+                    forwardPayload: emptySlice()
+                }.toCell()).endCell(), SendRemainingValue);
         } else {
             self.owner = msg.prevOwner;
             self.nftAddress = sender();
@@ -53,14 +58,19 @@ contract Task4 with Deployable {
             self.reply("NFT is still locked".asComment());
         } else {
             self.owner = null;
-            self.mySend(msg.nftAddress, SendRemainingValue, Transfer{queryId: msg.queryId,
-                        newOwner: sender(),
-                        responseDestination: sender(),
-                        customPayload: null,
-                        forwardAmount: 0,
-                        forwardPayload: emptySlice()
-                    }.toCell()
-            );
+            nativeSendMessage(beginCell()
+                .storeInt(0x18, 6)
+                .storeAddress(msg.nftAddress)
+                .storeCoins(0)
+                .storeUint(0, 105)
+                .storeBool(false).storeBool(true)
+                .storeRef(Transfer{queryId: msg.queryId,
+                    newOwner: sender(),
+                    responseDestination: sender(),
+                    customPayload: null,
+                    forwardAmount: 0,
+                    forwardPayload: emptySlice()
+                }.toCell()).endCell(), SendRemainingValue);
         }
     }
 
@@ -82,15 +92,4 @@ contract Task4 with Deployable {
         return self.owner;
     }
 
-    fun mySend(to: Address, mode: Int, body: Cell) {
-        let b: Builder = beginCell()
-            .storeInt(0x18, 6)
-            .storeAddress(to)
-            .storeCoins(0)
-            .storeUint(0, 105)
-            .storeBool(false).storeBool(true)
-            .storeRef(body);
-        
-        nativeSendMessage(b.endCell(), mode);
-    }
 }
