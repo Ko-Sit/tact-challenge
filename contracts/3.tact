@@ -88,7 +88,7 @@ contract Task3 with Deployable {
             nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(sender()
                     ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
                     ).storeRef(beginCell().storeRef(TokenTransfer{queryId: msg.queryId,
-                                amount: msg.amount,
+                                amount: 0,
                                 destination: msg.from,
                                 responseDestination: myAddress(),
                                 customPayload: null,
