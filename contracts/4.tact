@@ -32,17 +32,18 @@ contract Task4 with Deployable {
 
     receive(msg: OwnershipAssigned){
         if (self.owner != null) {
-            send(SendParameters{to: sender(),
-                    value: 0,
-                    mode: SendRemainingValue,
-                    body: Transfer{queryId: msg.queryId,
+            nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(sender()
+                ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                ).storeRef(beginCell().storeRef(Transfer{queryId: msg.queryId,
                         newOwner: msg.prevOwner,
                         responseDestination: msg.prevOwner,
                         customPayload: null,
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-                }
+                    ).endCell()
+                ).endCell(),
+                SendRemainingValue
             );
         } else {
             self.owner = msg.prevOwner;
@@ -57,17 +58,18 @@ contract Task4 with Deployable {
             self.reply("NFT is still locked".asComment());
         } else {
             self.owner = null;
-            send(SendParameters{to: msg.nftAddress,
-                    mode: SendRemainingValue,
-                    value: 0,
-                    body: Transfer{queryId: msg.queryId,
+            nativeSendMessage(beginCell().storeInt(1, 2).storeBool(true).storeInt(0, 3).storeAddress(msg.nftAddress
+                ).storeCoins(0).storeInt(0, 1 + 4 + 4 + 64 + 32).storeBool(false).storeBool(true
+                ).storeRef(beginCell().storeRef(Transfer{queryId: msg.queryId,
                         newOwner: sender(),
                         responseDestination: sender(),
                         customPayload: null,
                         forwardAmount: 0,
                         forwardPayload: emptySlice()
                     }.toCell()
-                }
+                    ).endCell()
+                ).endCell(),
+                SendRemainingValue
             );
         }
     }
