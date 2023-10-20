@@ -22,6 +22,7 @@ struct Vault {
     nftAddress: Address?;
     releaseTime: Int? as int32;
     owner: Address?;
+    
 }
 
 contract Task4 with Deployable {
@@ -77,7 +78,10 @@ contract Task4 with Deployable {
     }
 
     get fun time(): Int {
-        return self.vault.releaseTime!! - now();
+        if (self.vault.releaseTime != null) {
+            return self.vault.releaseTime!! - now();
+        }
+        return 0;
     }
 
     get fun nft(): Address? {
